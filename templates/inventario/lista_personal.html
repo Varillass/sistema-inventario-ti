@@ -1,0 +1,95 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Personal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gestión de Personal</h1>
+        <a href="{% url 'inventario:crear_personal' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus fa-sm"></i> Nuevo Personal
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Personal</h6>
+        </div>
+        <div class="card-body">
+            {% if personal %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Nombre Completo</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Área</th>
+                                <th>Cargo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for persona in personal %}
+                            <tr>
+                                <td>{{ persona.get_full_name }}</td>
+                                <td>{{ persona.email|default:"-" }}</td>
+                                <td>{{ persona.telefono|default:"-" }}</td>
+                                <td>{{ persona.area.nombre }}</td>
+                                <td>{{ persona.cargo|default:"-" }}</td>
+                                <td>
+                                    {% if persona.activo %}
+                                        <span class="badge badge-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'inventario:editar_personal' persona.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-danger" 
+                                       onclick="confirmarEliminacion('{{ persona.get_full_name }}', '{% url 'inventario:eliminar_personal' persona.id %}')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-500">No hay personal registrado</h5>
+                    <p class="text-gray-400">Comienza agregando nuevo personal</p>
+                    <a href="{% url 'inventario:crear_personal' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Agregar Primer Personal
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmarEliminacion(nombre, url) {
+    if (confirm(`¿Estás seguro de que quieres eliminar a "${nombre}"?`)) {
+        window.location.href = url;
+    }
+}
+</script>
+{% endblock %} 

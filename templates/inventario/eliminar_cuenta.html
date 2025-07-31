@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Cuenta - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-trash text-danger me-2"></i>
+                Eliminar Cuenta
+            </h1>
+            <p class="text-muted">Confirmar eliminación de cuenta</p>
+        </div>
+        <div>
+            <a href="{% url 'inventario:lista_cuentas' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>¡Atención!</h6>
+                        <p class="mb-0">Estás a punto de eliminar la cuenta <strong>"{{ cuenta.nombre }}"</strong>. Esta acción no se puede deshacer.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Información de la Cuenta
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <strong>Nombre:</strong><br>
+                                <span class="h6">{{ cuenta.nombre }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Tipo:</strong><br>
+                                <span class="badge bg-primary">{{ cuenta.get_tipo_cuenta_display }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Email:</strong><br>
+                                <span>{{ cuenta.email }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Estado:</strong><br>
+                                {% if cuenta.estado == 'activa' %}
+                                    <span class="badge bg-success">{{ cuenta.get_estado_display }}</span>
+                                {% elif cuenta.estado == 'inactiva' %}
+                                    <span class="badge bg-secondary">{{ cuenta.get_estado_display }}</span>
+                                {% elif cuenta.estado == 'suspendida' %}
+                                    <span class="badge bg-warning">{{ cuenta.get_estado_display }}</span>
+                                {% elif cuenta.estado == 'vencida' %}
+                                    <span class="badge bg-danger">{{ cuenta.get_estado_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-calendar-alt me-2"></i>Fechas
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <strong>Fecha de Creación:</strong><br>
+                                {{ cuenta.fecha_creacion|date:"d/m/Y H:i" }}
+                            </div>
+                            
+                            {% if cuenta.fecha_creacion_cuenta %}
+                                <div class="mb-3">
+                                    <strong>Fecha de Creación de Cuenta:</strong><br>
+                                    {{ cuenta.fecha_creacion_cuenta|date:"d/m/Y" }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if cuenta.fecha_vencimiento %}
+                                <div class="mb-3">
+                                    <strong>Fecha de Vencimiento:</strong><br>
+                                    {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if cuenta.personal_asignado %}
+                                <div class="mb-3">
+                                    <strong>Asignado a:</strong><br>
+                                    {{ cuenta.personal_asignado.get_full_name }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>¿Qué sucede al eliminar?</h6>
+                        <ul class="mb-0">
+                            <li>La cuenta se marcará como inactiva (no se eliminará físicamente)</li>
+                            <li>Se mantendrá el historial de la cuenta</li>
+                            <li>La información de acceso se conservará encriptada</li>
+                            <li>Podrás reactivar la cuenta desde la gestión avanzada</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'inventario:lista_cuentas' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Confirmar Eliminación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

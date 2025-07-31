@@ -1,0 +1,133 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Editar Personal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Editar Personal</h1>
+        <a href="{% url 'inventario:lista_personal' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Información del Personal</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nombre">Nombre *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   value="{{ personal.nombre }}" required>
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="apellido">Apellido *</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" 
+                                   value="{{ personal.apellido }}" required>
+                            {% if form.apellido.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.apellido.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ personal.email }}">
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="text" class="form-control" id="telefono" name="telefono" 
+                                   value="{{ personal.telefono }}">
+                            {% if form.telefono.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.telefono.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="area">Área *</label>
+                            <select class="form-control" id="area" name="area" required>
+                                <option value="">Selecciona un área</option>
+                                {% for area in areas %}
+                                    <option value="{{ area.id }}" 
+                                            {% if personal.area.id == area.id %}selected{% endif %}>
+                                        {{ area.nombre }} - {{ area.sede.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.area.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.area.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="cargo">Cargo</label>
+                            <input type="text" class="form-control" id="cargo" name="cargo" 
+                                   value="{{ personal.cargo }}">
+                            {% if form.cargo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.cargo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="activo" name="activo" 
+                               {% if personal.activo %}checked{% endif %}>
+                        <label class="custom-control-label" for="activo">
+                            Personal activo
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Actualizar Personal
+                    </button>
+                    <a href="{% url 'inventario:lista_personal' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

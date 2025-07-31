@@ -1,0 +1,130 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Categorías{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-tags me-2"></i>Gestión de Categorías
+        </h1>
+        <a href="{% url 'inventario:crear_categoria' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nueva Categoría
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Categorías</h6>
+        </div>
+        <div class="card-body">
+            {% if categorias %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="categoriasTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Productos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for categoria in categorias %}
+                            <tr>
+                                <td>{{ categoria.id }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ categoria.nombre }}</span>
+                                </td>
+                                <td>{{ categoria.descripcion|default:"Sin descripción" }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ categoria.producto_set.count }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'inventario:editar_categoria' categoria.id %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                onclick="confirmarEliminar({{ categoria.id }}, '{{ categoria.nombre }}')"
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay categorías registradas</h5>
+                    <p class="text-muted">Comienza creando tu primera categoría</p>
+                    <a href="{% url 'inventario:crear_categoria' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Crear Primera Categoría
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que quieres eliminar la categoría "<span id="categoriaNombre"></span>"?</p>
+                <p class="text-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a href="#" id="btnEliminar" class="btn btn-danger">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#categoriasTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+            },
+            order: [[1, 'asc']],
+            pageLength: 25
+        });
+    });
+
+    function confirmarEliminar(categoriaId, categoriaNombre) {
+        document.getElementById('categoriaNombre').textContent = categoriaNombre;
+        document.getElementById('btnEliminar').href = `/categorias/${categoriaId}/eliminar/`;
+        new bootstrap.Modal(document.getElementById('eliminarModal')).show();
+    }
+</script>
+{% endblock %} 

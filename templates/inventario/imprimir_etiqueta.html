@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta - {{ producto.codigo }}</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .etiqueta-container {
+            width: 300px;
+            height: 200px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0 auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            width: 30px;
+            height: 30px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .brand {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .brand .green {
+            color: #27ae60;
+            font-style: italic;
+        }
+        
+        .brand .electronics {
+            color: #333;
+        }
+        
+        .barcode-container {
+            text-align: center;
+            margin: 10px 15px;
+            padding: 0 5px;
+        }
+        
+        .barcode-image {
+            max-width: 90%;
+            height: 100px;
+            margin-bottom: 10px;
+            border: 1px solid black; /* Cambiado a negro */
+            padding: 8px;
+            background: white;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        
+        .product-code {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 8px 0;
+            color: #333;
+        }
+        
+        .inventory-year {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .print-button:hover {
+            background: #0056b3;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .back-button:hover {
+            background: #545b62;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button no-print" onclick="window.print()">
+        🖨️ Imprimir Etiqueta
+    </button>
+    
+    <a href="{% url 'inventario:detalle_producto' producto.id %}" class="back-button no-print">
+        ← Volver
+    </a>
+    
+    <div class="etiqueta-container">
+        <div class="header">
+            <div class="logo">⚡</div>
+            <div class="brand">
+                <span class="green">green</span><span class="electronics">electronics</span>
+            </div>
+        </div>
+        
+        <div class="barcode-container">
+            {% if codigo_barras %}
+                <img src="{{ codigo_barras }}" alt="Código de Barras" class="barcode-image">
+            {% else %}
+                <div style="height: 60px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666;">
+                    Código de Barras no disponible
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="product-code">
+            {{ producto.codigo }}
+        </div>
+        
+        <div class="inventory-year">
+            Inv. {{ anio_actual }}
+        </div>
+    </div>
+    
+    <script>
+        // Auto-print al cargar la página (opcional)
+        // window.onload = function() {
+        //     window.print();
+        // }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Movimiento - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-edit"></i> Editar Movimiento #{{ movimiento.id }}
+        </h1>
+        <a href="{% url 'inventario:lista_movimientos' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Formulario de Edición</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <!-- Producto y Tipo de Movimiento -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="producto" class="form-label">Producto *</label>
+                            <select name="producto" id="producto" class="form-select" required>
+                                <option value="">Seleccione un producto</option>
+                                {% for producto in productos %}
+                                <option value="{{ producto.id }}" {% if producto.id == movimiento.producto.id %}selected{% endif %}>
+                                    {{ producto.nombre }} ({{ producto.codigo }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="tipo_movimiento" class="form-label">Tipo de Movimiento *</label>
+                            <select name="tipo_movimiento" id="tipo_movimiento" class="form-select" required>
+                                <option value="">Seleccione un tipo</option>
+                                {% for tipo in tipos_movimiento %}
+                                <option value="{{ tipo.id }}" {% if tipo.id == movimiento.tipo_movimiento.id %}selected{% endif %}>
+                                    {{ tipo.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Cantidad y Motivo -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="cantidad" class="form-label">Cantidad *</label>
+                            <input type="number" name="cantidad" id="cantidad" class="form-control" 
+                                   value="{{ movimiento.cantidad }}" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="motivo" class="form-label">Motivo</label>
+                            <textarea name="motivo" id="motivo" class="form-control" rows="3" 
+                                      placeholder="Descripción del motivo del movimiento">{{ movimiento.motivo }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Ubicación de Origen -->
+                <h6 class="font-weight-bold text-success mb-3">
+                    <i class="fas fa-arrow-up"></i> Ubicación de Origen
+                </h6>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="sede_origen" class="form-label">Sede Origen</label>
+                            <select name="sede_origen" id="sede_origen" class="form-select">
+                                <option value="">Seleccione una sede</option>
+                                {% for sede in sedes %}
+                                <option value="{{ sede.id }}" {% if sede.id == movimiento.sede_origen.id %}selected{% endif %}>
+                                    {{ sede.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="area_origen" class="form-label">Área Origen</label>
+                            <select name="area_origen" id="area_origen" class="form-select">
+                                <option value="">Seleccione un área</option>
+                                {% for area in areas %}
+                                <option value="{{ area.id }}" {% if area.id == movimiento.area_origen.id %}selected{% endif %}>
+                                    {{ area.nombre }} - {{ area.sede.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="personal_origen" class="form-label">Personal Origen</label>
+                            <select name="personal_origen" id="personal_origen" class="form-select">
+                                <option value="">Seleccione personal</option>
+                                {% for pers in personal %}
+                                <option value="{{ pers.id }}" {% if pers.id == movimiento.personal_origen.id %}selected{% endif %}>
+                                    {{ pers.get_full_name }} - {{ pers.area.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Ubicación de Destino -->
+                <h6 class="font-weight-bold text-primary mb-3">
+                    <i class="fas fa-arrow-down"></i> Ubicación de Destino
+                </h6>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="sede_destino" class="form-label">Sede Destino</label>
+                            <select name="sede_destino" id="sede_destino" class="form-select">
+                                <option value="">Seleccione una sede</option>
+                                {% for sede in sedes %}
+                                <option value="{{ sede.id }}" {% if sede.id == movimiento.sede_destino.id %}selected{% endif %}>
+                                    {{ sede.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="area_destino" class="form-label">Área Destino</label>
+                            <select name="area_destino" id="area_destino" class="form-select">
+                                <option value="">Seleccione un área</option>
+                                {% for area in areas %}
+                                <option value="{{ area.id }}" {% if area.id == movimiento.area_destino.id %}selected{% endif %}>
+                                    {{ area.nombre }} - {{ area.sede.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="personal_destino" class="form-label">Personal Destino</label>
+                            <select name="personal_destino" id="personal_destino" class="form-select">
+                                <option value="">Seleccione personal</option>
+                                {% for pers in personal %}
+                                <option value="{{ pers.id }}" {% if pers.id == movimiento.personal_destino.id %}selected{% endif %}>
+                                    {{ pers.get_full_name }} - {{ pers.area.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'inventario:lista_movimientos' %}" class="btn btn-secondary me-2">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Cargar áreas cuando se selecciona una sede (origen)
+    $('#sede_origen').change(function() {
+        const sedeId = $(this).val();
+        const areaSelect = $('#area_origen');
+        
+        areaSelect.empty().append('<option value="">Seleccione un área</option>');
+        
+        if (sedeId) {
+            $.ajax({
+                url: '{% url "inventario:api_areas_por_sede" %}',
+                type: 'GET',
+                data: { sede_id: sedeId },
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.areas) {
+                        response.areas.forEach(function(area) {
+                            areaSelect.append(`<option value="${area.id}">${area.nombre}</option>`);
+                        });
+                    }
+                },
+                error: function() {
+                    console.error('Error al cargar áreas');
+                }
+            });
+        }
+    });
+
+    // Cargar personal cuando se selecciona un área (origen)
+    $('#area_origen').change(function() {
+        const areaId = $(this).val();
+        const personalSelect = $('#personal_origen');
+        
+        personalSelect.empty().append('<option value="">Seleccione personal</option>');
+        
+        if (areaId) {
+            $.ajax({
+                url: '{% url "inventario:api_personal_por_area" %}',
+                type: 'GET',
+                data: { area_id: areaId },
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.personal) {
+                        response.personal.forEach(function(pers) {
+                            personalSelect.append(`<option value="${pers.id}">${pers.nombre} ${pers.apellido}</option>`);
+                        });
+                    }
+                },
+                error: function() {
+                    console.error('Error al cargar personal');
+                }
+            });
+        }
+    });
+
+    // Cargar áreas cuando se selecciona una sede (destino)
+    $('#sede_destino').change(function() {
+        const sedeId = $(this).val();
+        const areaSelect = $('#area_destino');
+        
+        areaSelect.empty().append('<option value="">Seleccione un área</option>');
+        
+        if (sedeId) {
+            $.ajax({
+                url: '{% url "inventario:api_areas_por_sede" %}',
+                type: 'GET',
+                data: { sede_id: sedeId },
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.areas) {
+                        response.areas.forEach(function(area) {
+                            areaSelect.append(`<option value="${area.id}">${area.nombre}</option>`);
+                        });
+                    }
+                },
+                error: function() {
+                    console.error('Error al cargar áreas');
+                }
+            });
+        }
+    });
+
+    // Cargar personal cuando se selecciona un área (destino)
+    $('#area_destino').change(function() {
+        const areaId = $(this).val();
+        const personalSelect = $('#personal_destino');
+        
+        personalSelect.empty().append('<option value="">Seleccione personal</option>');
+        
+        if (areaId) {
+            $.ajax({
+                url: '{% url "inventario:api_personal_por_area" %}',
+                type: 'GET',
+                data: { area_id: areaId },
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.personal) {
+                        response.personal.forEach(function(pers) {
+                            personalSelect.append(`<option value="${pers.id}">${pers.nombre} ${pers.apellido}</option>`);
+                        });
+                    }
+                },
+                error: function() {
+                    console.error('Error al cargar personal');
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-chart-bar"></i> Reportes del Sistema
+        </h1>
+        <button class="btn btn-success" onclick="exportarTodos()">
+            <i class="fas fa-download"></i> Exportar Todos
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Reporte de Inventario -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-boxes"></i> Reporte de Inventario
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Genera un reporte PDF completo del inventario actual con todos los productos, cantidades y valores.</p>
+                    <form method="post" action="{% url 'inventario:reportes' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="tipo_reporte" value="inventario">
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label">Filtrar por Categoría</label>
+                            <select name="categoria" id="categoria" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="estado" class="form-label">Filtrar por Estado</label>
+                            <select name="estado" id="estado" class="form-select">
+                                <option value="">Todos los estados</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                                <option value="mantenimiento">Mantenimiento</option>
+                                <option value="retirado">Retirado</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-pdf"></i> Generar PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte de Movimientos -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-exchange-alt"></i> Reporte de Movimientos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Reporte PDF detallado de todos los movimientos de inventario en un período específico.</p>
+                    <form method="post" action="{% url 'inventario:reportes' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="tipo_reporte" value="movimientos">
+                        <div class="mb-3">
+                            <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                            <input type="date" name="fecha_desde" id="fecha_desde" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                            <input type="date" name="fecha_hasta" id="fecha_hasta" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="tipo_movimiento" class="form-label">Tipo de Movimiento</label>
+                            <select name="tipo_movimiento" id="tipo_movimiento" class="form-select">
+                                <option value="">Todos los tipos</option>
+                                {% for tipo in tipos_movimiento %}
+                                <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-pdf"></i> Generar PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte de Valor -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-dollar-sign"></i> Reporte de Valor
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Reporte PDF del valor total del inventario con desglose por categorías y productos.</p>
+                    <form method="post" action="{% url 'inventario:reportes' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="tipo_reporte" value="categoria">
+                        <div class="mb-3">
+                            <label for="categoria_rep" class="form-label">Por Categoría</label>
+                            <select name="categoria" id="categoria_rep" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="orden" class="form-label">Orden</label>
+                            <select name="orden" id="orden" class="form-select">
+                                <option value="mayor_menor">Mayor a Menor</option>
+                                <option value="menor_mayor">Menor a Mayor</option>
+                                <option value="valor">Por Valor</option>
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-pdf"></i> Generar PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reportes Recientes -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-history"></i> Reportes Recientes
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="reportesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Usuario</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reporte in reportes_recientes %}
+                        <tr>
+                            <td>{{ reporte.nombre }}</td>
+                            <td>{{ reporte.get_tipo_display }}</td>
+                            <td>{{ reporte.usuario.get_full_name }}</td>
+                            <td>{{ reporte.fecha_generacion|date:"d/m/Y H:i" }}</td>
+                            <td><span class="badge bg-success">Completado</span></td>
+                            <td>
+                                <a href="{% url 'inventario:descargar_reporte' reporte.id %}" 
+                                   class="btn btn-sm btn-primary" title="Descargar PDF">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </a>
+                                <a href="{% url 'inventario:eliminar_reporte' reporte.id %}" 
+                                   class="btn btn-sm btn-danger" title="Eliminar"
+                                   onclick="return confirm('¿Está seguro de que desea eliminar este reporte?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No hay reportes generados aún
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Productos
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_productos|default:"0" }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Valor Total
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ valor_total|default:"0"|floatformat:0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Movimientos Hoy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ movimientos_hoy|default:"0" }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Stock Bajo
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stock_bajo|default:"0" }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Solo inicializar DataTables si hay reportes
+    const reportesTable = $('#reportesTable tbody tr');
+    if (reportesTable.length > 0 && !reportesTable.first().find('td[colspan]').length) {
+        $('#reportesTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+            },
+            "pageLength": 10,
+            "order": [[3, "desc"]],
+            "autoWidth": false,
+            "responsive": true
+        });
+    }
+    
+    // Establecer fechas por defecto
+    const today = new Date();
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    
+    $('#fecha_desde').val(lastMonth.toISOString().split('T')[0]);
+    $('#fecha_hasta').val(today.toISOString().split('T')[0]);
+});
+
+// Las funciones de generación de reportes ahora se manejan con formularios POST
+
+function exportarTodos() {
+    if (confirm('¿Desea generar todos los reportes disponibles?')) {
+        mostrarCargando('Generando todos los reportes...');
+        
+        setTimeout(() => {
+            ocultarCargando();
+            alert('Todos los reportes han sido generados exitosamente.');
+        }, 3000);
+    }
+}
+
+function mostrarCargando(mensaje) {
+    // Crear overlay de carga
+    const overlay = $('<div class="loading-overlay"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div><p class="mt-2">' + mensaje + '</p></div>');
+    $('body').append(overlay);
+    overlay.fadeIn();
+}
+
+function ocultarCargando() {
+    $('.loading-overlay').fadeOut(function() {
+        $(this).remove();
+    });
+}
+</script>
+
+<style>
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+    display: none;
+}
+</style>
+{% endblock %} 

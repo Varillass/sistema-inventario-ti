@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Movimiento{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-plus"></i> Crear Movimiento de Inventario
+        </h1>
+        <a href="{% url 'inventario:lista_movimientos' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Nuevo Movimiento</h6>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="movimientoForm">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="producto" class="form-label">Producto *</label>
+                            <select name="producto" id="producto" class="form-select" required>
+                                <option value="">Seleccione un producto</option>
+                                {% for producto in productos %}
+                                <option value="{{ producto.id }}" data-stock="{{ producto.cantidad }}">
+                                    {{ producto.nombre }} (Stock: {{ producto.cantidad }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tipo_movimiento" class="form-label">Tipo de Movimiento *</label>
+                            <select name="tipo_movimiento" id="tipo_movimiento" class="form-select" required>
+                                <option value="">Seleccione el tipo</option>
+                                {% for tipo in tipos_movimiento %}
+                                <option value="{{ tipo.id }}" data-es-entrada="{{ tipo.es_entrada|yesno:'true,false' }}">
+                                    {{ tipo.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cantidad" class="form-label">Cantidad *</label>
+                            <input type="number" name="cantidad" id="cantidad" class="form-control" 
+                                   min="1" step="1" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="motivo" class="form-label">Motivo *</label>
+                            <textarea name="motivo" id="motivo" class="form-control" rows="3" 
+                                      placeholder="Describa el motivo del movimiento" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="referencia" class="form-label">Referencia</label>
+                            <input type="text" name="referencia" id="referencia" class="form-control" 
+                                   placeholder="Número de factura, orden, etc.">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="sede_origen" class="form-label">Sede Origen</label>
+                            <select name="sede_origen" id="sede_origen" class="form-select">
+                                <option value="">Seleccione una sede</option>
+                                {% for sede in sedes %}
+                                <option value="{{ sede.id }}">{{ sede.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="area_origen" class="form-label">Área Origen</label>
+                            <select name="area_origen" id="area_origen" class="form-select">
+                                <option value="">Seleccione un área</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="personal_origen" class="form-label">Personal Origen</label>
+                            <select name="personal_origen" id="personal_origen" class="form-select">
+                                <option value="">Sin asignar</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="sede_destino" class="form-label">Sede Destino</label>
+                            <select name="sede_destino" id="sede_destino" class="form-select">
+                                <option value="">Seleccione una sede</option>
+                                {% for sede in sedes %}
+                                <option value="{{ sede.id }}">{{ sede.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="area_destino" class="form-label">Área Destino</label>
+                            <select name="area_destino" id="area_destino" class="form-select">
+                                <option value="">Seleccione un área</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="personal_destino" class="form-label">Personal Destino</label>
+                            <select name="personal_destino" id="personal_destino" class="form-select">
+                                <option value="">Sin asignar</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="observaciones" class="form-label">Observaciones</label>
+                            <textarea name="observaciones" id="observaciones" class="form-control" rows="3" 
+                                      placeholder="Observaciones adicionales"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info" id="stockInfo" style="display: none;">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="stockMessage"></span>
+                </div>
+                
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary me-2" onclick="history.back()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Registrar Movimiento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Validación de stock
+    $('#producto, #tipo_movimiento, #cantidad').on('change', function() {
+        validarStock();
+    });
+    
+    function validarStock() {
+        const producto = $('#producto option:selected');
+        const tipoMovimiento = $('#tipo_movimiento option:selected');
+        const cantidad = parseInt($('#cantidad').val()) || 0;
+        
+        if (producto.val() && tipoMovimiento.val() && cantidad > 0) {
+            const stockActual = parseInt(producto.data('stock')) || 0;
+            const esEntrada = tipoMovimiento.data('es-entrada') === true;
+            
+            if (!esEntrada && cantidad > stockActual) {
+                $('#stockInfo').removeClass('alert-info').addClass('alert-warning').show();
+                $('#stockMessage').text(`⚠️ Advertencia: El stock actual es ${stockActual} y está intentando retirar ${cantidad} unidades.`);
+            } else if (esEntrada) {
+                $('#stockInfo').removeClass('alert-warning').addClass('alert-info').show();
+                $('#stockMessage').text(`ℹ️ El nuevo stock será: ${stockActual + cantidad} unidades.`);
+            } else {
+                $('#stockInfo').removeClass('alert-warning').addClass('alert-info').show();
+                $('#stockMessage').text(`ℹ️ El nuevo stock será: ${stockActual - cantidad} unidades.`);
+            }
+        } else {
+            $('#stockInfo').hide();
+        }
+    }
+    
+    // Cargar áreas cuando se selecciona una sede origen
+    $('#sede_origen').change(function() {
+        const sedeId = $(this).val();
+        const areaSelect = $('#area_origen');
+        const personalSelect = $('#personal_origen');
+        
+        // Limpiar opciones
+        areaSelect.html('<option value="">Seleccione un área</option>');
+        personalSelect.html('<option value="">Sin asignar</option>');
+        
+        if (sedeId) {
+            // Cargar áreas de la sede
+            $.ajax({
+                url: '/api/areas-por-sede/',
+                method: 'POST',
+                data: JSON.stringify({ sede_id: sedeId }),
+                contentType: 'application/json',
+                success: function(response) {
+                    response.areas.forEach(function(area) {
+                        areaSelect.append(`<option value="${area.id}">${area.nombre}</option>`);
+                    });
+                }
+            });
+        }
+    });
+    
+    // Cargar personal cuando se selecciona un área origen
+    $('#area_origen').change(function() {
+        const areaId = $(this).val();
+        const personalSelect = $('#personal_origen');
+        
+        // Limpiar opciones
+        personalSelect.html('<option value="">Sin asignar</option>');
+        
+        if (areaId) {
+            // Cargar personal del área
+            $.ajax({
+                url: '/api/personal-por-area/',
+                method: 'POST',
+                data: JSON.stringify({ area_id: areaId }),
+                contentType: 'application/json',
+                success: function(response) {
+                    response.personal.forEach(function(persona) {
+                        personalSelect.append(`<option value="${persona.id}">${persona.nombre} ${persona.apellido}</option>`);
+                    });
+                }
+            });
+        }
+    });
+    
+    // Cargar áreas cuando se selecciona una sede destino
+    $('#sede_destino').change(function() {
+        const sedeId = $(this).val();
+        const areaSelect = $('#area_destino');
+        const personalSelect = $('#personal_destino');
+        
+        // Limpiar opciones
+        areaSelect.html('<option value="">Seleccione un área</option>');
+        personalSelect.html('<option value="">Sin asignar</option>');
+        
+        if (sedeId) {
+            // Cargar áreas de la sede
+            $.ajax({
+                url: '/api/areas-por-sede/',
+                method: 'POST',
+                data: JSON.stringify({ sede_id: sedeId }),
+                contentType: 'application/json',
+                success: function(response) {
+                    response.areas.forEach(function(area) {
+                        areaSelect.append(`<option value="${area.id}">${area.nombre}</option>`);
+                    });
+                }
+            });
+        }
+    });
+    
+    // Cargar personal cuando se selecciona un área destino
+    $('#area_destino').change(function() {
+        const areaId = $(this).val();
+        const personalSelect = $('#personal_destino');
+        
+        // Limpiar opciones
+        personalSelect.html('<option value="">Sin asignar</option>');
+        
+        if (areaId) {
+            // Cargar personal del área
+            $.ajax({
+                url: '/api/personal-por-area/',
+                method: 'POST',
+                data: JSON.stringify({ area_id: areaId }),
+                contentType: 'application/json',
+                success: function(response) {
+                    response.personal.forEach(function(persona) {
+                        personalSelect.append(`<option value="${persona.id}">${persona.nombre} ${persona.apellido}</option>`);
+                    });
+                }
+            });
+        }
+    });
+    
+    // Validación del formulario
+    $('#movimientoForm').on('submit', function(e) {
+        const producto = $('#producto').val();
+        const tipoMovimiento = $('#tipo_movimiento').val();
+        const cantidad = parseInt($('#cantidad').val()) || 0;
+        const motivo = $('#motivo').val().trim();
+        
+        if (!producto || !tipoMovimiento || cantidad <= 0 || !motivo) {
+            e.preventDefault();
+            alert('Por favor complete todos los campos obligatorios.');
+            return false;
+        }
+        
+        // Validación adicional de stock para salidas
+        const tipoSeleccionado = $('#tipo_movimiento option:selected');
+        const esEntrada = tipoSeleccionado.data('es-entrada') === true;
+        
+        if (!esEntrada) {
+            const stockActual = parseInt($('#producto option:selected').data('stock')) || 0;
+            if (cantidad > stockActual) {
+                if (!confirm(`⚠️ Advertencia: El stock actual es ${stockActual} y está intentando retirar ${cantidad} unidades. ¿Desea continuar?`)) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

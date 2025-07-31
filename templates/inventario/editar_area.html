@@ -1,0 +1,90 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Editar Área{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Editar Área</h1>
+        <a href="{% url 'inventario:lista_areas' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Información de la Área</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nombre">Nombre de la Área *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   value="{{ area.nombre }}" required>
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="sede">Sede *</label>
+                            <select class="form-control" id="sede" name="sede" required>
+                                <option value="">Selecciona una sede</option>
+                                {% for sede in sedes %}
+                                    <option value="{{ sede.id }}" 
+                                            {% if area.sede.id == sede.id %}selected{% endif %}>
+                                        {{ sede.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.sede.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.sede.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" 
+                              rows="3">{{ area.descripcion }}</textarea>
+                    {% if form.descripcion.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.descripcion.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="activo" name="activo" 
+                               {% if area.activo %}checked{% endif %}>
+                        <label class="custom-control-label" for="activo">
+                            Área activa
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Actualizar Área
+                    </button>
+                    <a href="{% url 'inventario:lista_areas' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

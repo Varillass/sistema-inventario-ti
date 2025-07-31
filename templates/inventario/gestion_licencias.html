@@ -1,0 +1,244 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Gestión Avanzada de Licencias{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gestión Avanzada de Licencias</h1>
+        <a href="{% url 'inventario:lista_licencias' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Volver a Licencias
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Licencias</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_licencias }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-key fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Licencias Activas</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ licencias_activas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Disponibles</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ licencias_disponibles }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-available fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Asignadas</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ licencias_asignadas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-laptop fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Licencias por Tipo de Distribución -->
+    <div class="row">
+        <!-- Licencias OEM -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="fas fa-desktop"></i> Licencias OEM
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if licencias_oem %}
+                        <div class="list-group list-group-flush">
+                            {% for licencia in licencias_oem %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ licencia.nombre }}</h6>
+                                        <small class="text-muted">{{ licencia.proveedor|default:"Sin proveedor" }}</small>
+                                    </div>
+                                    <span class="badge {% if licencia.licencias_disponibles > 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">
+                                        {{ licencia.licencias_disponibles }}/{{ licencia.cantidad_licencias }}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No hay licencias OEM registradas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Licencias Retail -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-shopping-cart"></i> Licencias Retail
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if licencias_retail %}
+                        <div class="list-group list-group-flush">
+                            {% for licencia in licencias_retail %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ licencia.nombre }}</h6>
+                                        <small class="text-muted">{{ licencia.proveedor|default:"Sin proveedor" }}</small>
+                                    </div>
+                                    <span class="badge {% if licencia.licencias_disponibles > 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">
+                                        {{ licencia.licencias_disponibles }}/{{ licencia.cantidad_licencias }}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No hay licencias Retail registradas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Licencias Volume -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-secondary">
+                        <i class="fas fa-building"></i> Licencias Volume
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if licencias_volume %}
+                        <div class="list-group list-group-flush">
+                            {% for licencia in licencias_volume %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ licencia.nombre }}</h6>
+                                        <small class="text-muted">{{ licencia.proveedor|default:"Sin proveedor" }}</small>
+                                    </div>
+                                    <span class="badge {% if licencia.licencias_disponibles > 0 %}badge-success{% else %}badge-danger{% endif %} badge-pill">
+                                        {{ licencia.licencias_disponibles }}/{{ licencia.cantidad_licencias }}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No hay licencias Volume registradas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos con Licencias Asignadas -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-laptop"></i> Productos con Licencias Asignadas
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if productos_con_licencias %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th>Licencias Asignadas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos_con_licencias %}
+                                <tr>
+                                    <td>{{ producto.codigo }}</td>
+                                    <td>{{ producto.nombre }}</td>
+                                    <td>{{ producto.categoria.nombre }}</td>
+                                    <td>
+                                        {% for licencia in producto.licencias.all %}
+                                            <span class="badge badge-info me-1">{{ licencia.nombre }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'inventario:detalle_producto' producto.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> Ver
+                                        </a>
+                                        <a href="{% url 'inventario:asignar_licencia_producto' producto.id %}" class="btn btn-sm btn-success">
+                                            <i class="fas fa-plus"></i> Asignar
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-laptop fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-500">No hay productos con licencias asignadas</h5>
+                    <p class="text-gray-400">Asigna licencias a los productos desde la vista de detalle del producto</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

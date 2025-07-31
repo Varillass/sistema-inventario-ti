@@ -1,0 +1,705 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Producto - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-plus me-2"></i>Crear Nuevo Producto
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'inventario:lista_productos' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-edit me-2"></i>Información del Producto
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="codigo" class="form-label">
+                                <i class="fas fa-barcode me-1"></i>Código
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="codigo" name="codigo" 
+                                       placeholder="Se generará automáticamente" readonly>
+                                <button type="button" class="btn btn-outline-secondary" id="btnGenerarCodigo">
+                                    <i class="fas fa-magic me-1"></i>Generar
+                                </button>
+                            </div>
+                            <div class="form-text" id="codigo_help_text">Código único generado automáticamente basado en la categoría</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="categoria" class="form-label">
+                                <i class="fas fa-tags me-1"></i>Categoría *
+                            </label>
+                            <select class="form-select" id="categoria" name="categoria" required>
+                                <option value="">Seleccionar categoría</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="nombre" class="form-label">
+                                <i class="fas fa-box me-1"></i>Nombre del Producto *
+                            </label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   required placeholder="Ej: Laptop Dell Latitude">
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="cantidad" class="form-label">
+                                <i class="fas fa-layer-group me-1"></i>Cantidad Inicial
+                            </label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad" 
+                                   value="0" min="0" placeholder="0">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="marca" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Marca
+                            </label>
+                            <input type="text" class="form-control" id="marca" name="marca" 
+                                   placeholder="Ej: Dell, HP, Lenovo">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="modelo" class="form-label">
+                                <i class="fas fa-cube me-1"></i>Modelo
+                            </label>
+                            <input type="text" class="form-control" id="modelo" name="modelo" 
+                                   placeholder="Ej: Latitude 5520">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="numero_serie" class="form-label">
+                                <i class="fas fa-hashtag me-1"></i>Número de Serie
+                            </label>
+                            <input type="text" class="form-control" id="numero_serie" name="numero_serie" 
+                                   placeholder="Ej: SN123456789">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="estado" class="form-label">
+                                <i class="fas fa-info-circle me-1"></i>Estado
+                            </label>
+                            <select class="form-select" id="estado" name="estado">
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                                <option value="mantenimiento">En Mantenimiento</option>
+                                <option value="retirado">Retirado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="precio_unitario" class="form-label">
+                                <i class="fas fa-dollar-sign me-1"></i>Precio Unitario
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="precio_unitario" name="precio_unitario" 
+                                       step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_adquisicion" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Fecha de Adquisición
+                            </label>
+                            <input type="date" class="form-control" id="fecha_adquisicion" name="fecha_adquisicion">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="proveedor" class="form-label">
+                                <i class="fas fa-truck me-1"></i>Proveedor
+                            </label>
+                            <input type="text" class="form-control" id="proveedor" name="proveedor" 
+                                   placeholder="Ej: Dell Technologies">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="garantia_hasta" class="form-label">
+                                <i class="fas fa-shield-alt me-1"></i>Garantía Hasta
+                            </label>
+                            <input type="date" class="form-control" id="garantia_hasta" name="garantia_hasta">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="ubicacion" class="form-label">
+                            <i class="fas fa-map-marker-alt me-1"></i>Ubicación
+                        </label>
+                        <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
+                               placeholder="Ej: Almacén Principal, Oficina 101">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">
+                            <i class="fas fa-align-left me-1"></i>Descripción
+                        </label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" 
+                                  rows="3" placeholder="Descripción detallada del producto..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">
+                            <i class="fas fa-sticky-note me-1"></i>Observaciones
+                        </label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" 
+                                  rows="2" placeholder="Observaciones adicionales..."></textarea>
+                    </div>
+                    
+                    <!-- Ubicación y Asignación -->
+                    <hr class="my-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>Ubicación y Asignación
+                    </h6>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="sede" class="form-label">
+                                <i class="fas fa-building me-1"></i>Sede
+                            </label>
+                            <select name="sede" id="sede" class="form-select">
+                                <option value="">Seleccione una sede</option>
+                                {% for sede_info in sedes_con_areas %}
+                                <option value="{{ sede_info.sede.id }}">
+                                    {{ sede_info.sede.nombre }} 
+                                    {% if sede_info.areas_count > 0 %}
+                                        ({{ sede_info.areas_count }} áreas)
+                                    {% else %}
+                                        (sin áreas)
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="area" class="form-label">
+                                <i class="fas fa-sitemap me-1"></i>Área
+                            </label>
+                            <select name="area" id="area" class="form-select">
+                                <option value="">Seleccione un área</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="personal_asignado" class="form-label">
+                                <i class="fas fa-user me-1"></i>Personal Asignado
+                            </label>
+                            <select name="personal_asignado" id="personal_asignado" class="form-select">
+                                <option value="">Sin asignar</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Propiedad del Equipo -->
+                    <hr class="my-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-handshake me-2"></i>Propiedad del Equipo
+                    </h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tipo_propiedad" class="form-label">
+                                <i class="fas fa-handshake me-1"></i>Tipo de Propiedad
+                            </label>
+                            <select name="tipo_propiedad" id="tipo_propiedad" class="form-select">
+                                <option value="propio">Propio</option>
+                                <option value="alquilado">Alquilado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3" id="codigo_alquiler_group" style="display: none;">
+                            <label for="codigo_alquiler" class="form-label">
+                                <i class="fas fa-key me-1"></i>Código de Alquiler
+                            </label>
+                            <input type="text" class="form-control" id="codigo_alquiler" name="codigo_alquiler"
+                                   placeholder="Código de alquiler">
+                        </div>
+                    </div>
+                    
+                    <div class="row" id="fechas_alquiler_group" style="display: none;">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_alquiler" class="form-label">
+                                <i class="fas fa-calendar-plus me-1"></i>Fecha de Inicio de Alquiler
+                            </label>
+                            <input type="date" class="form-control" id="fecha_alquiler" name="fecha_alquiler">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_vencimiento_alquiler" class="form-label">
+                                <i class="fas fa-calendar-times me-1"></i>Fecha de Vencimiento de Alquiler
+                            </label>
+                            <input type="date" class="form-control" id="fecha_vencimiento_alquiler" name="fecha_vencimiento_alquiler">
+                        </div>
+                    </div>
+                    
+                    <!-- Software y Sistema -->
+                    <hr class="my-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-desktop me-2"></i>Software y Sistema
+                    </h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="sistema_operativo" class="form-label">
+                                <i class="fas fa-desktop me-1"></i>Sistema Operativo
+                            </label>
+                            <input type="text" class="form-control" id="sistema_operativo" name="sistema_operativo"
+                                   placeholder="Ej: Windows 11, macOS, Linux">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="antivirus" name="antivirus">
+                                <label class="form-check-label" for="antivirus">
+                                    <i class="fas fa-shield-alt me-1"></i>Cuenta con Antivirus
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row" id="antivirus_details" style="display: none;">
+                        <div class="col-md-6 mb-3">
+                            <label for="antivirus_nombre" class="form-label">
+                                <i class="fas fa-shield-alt me-1"></i>Nombre del Antivirus
+                            </label>
+                            <input type="text" class="form-control" id="antivirus_nombre" name="antivirus_nombre"
+                                   placeholder="Ej: Norton, McAfee, Kaspersky">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-info me-md-2" id="btnTestAPI">
+                            <i class="fas fa-bug me-2"></i>Probar APIs
+                        </button>
+                        <a href="{% url 'inventario:lista_productos' %}" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Guardar Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-info-circle me-2"></i>Información
+                </h6>
+            </div>
+            <div class="card-body">
+                                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Consejos</h6>
+                        <ul class="mb-0">
+                            <li>El código se genera automáticamente al seleccionar la categoría</li>
+                            <li>Formato: CATEGORIA-00001 (ej: COMP-00001, RED-00001)</li>
+                            <li>No es necesario ingresar el código manualmente</li>
+                            <li>La cantidad inicial puede ser 0</li>
+                            <li>El precio es opcional</li>
+                        </ul>
+                    </div>
+                
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Importante</h6>
+                    <p class="mb-0">Los campos marcados con * son obligatorios</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('Script cargado'); // Debug
+
+// Esperar a que jQuery esté disponible
+function waitForJQuery() {
+    if (typeof $ !== 'undefined') {
+        console.log('✅ jQuery está disponible');
+        initializeApp();
+    } else {
+        console.log('⏳ Esperando a que jQuery se cargue...');
+        setTimeout(waitForJQuery, 100);
+    }
+}
+
+// Función principal de la aplicación
+function initializeApp() {
+    console.log('🚀 Inicializando aplicación...');
+    
+    $(document).ready(function() {
+    console.log('Document ready ejecutado'); // Debug
+    // Función para generar código automático
+    function generarCodigo() {
+        const categoriaId = $('#categoria').val();
+        console.log('Generando código para categoría ID:', categoriaId); // Debug
+        
+        if (!categoriaId) {
+            alert('Por favor, selecciona una categoría primero');
+            $('#categoria').focus();
+            return;
+        }
+        
+        // Mostrar indicador de carga
+        $('#btnGenerarCodigo').html('<i class="fas fa-spinner fa-spin me-1"></i>Generando...');
+        $('#btnGenerarCodigo').prop('disabled', true);
+        
+        // Llamar a la API
+        $.ajax({
+            url: '/api/generar-codigo/',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                categoria_id: categoriaId
+            }),
+            success: function(response) {
+                console.log('Respuesta exitosa:', response); // Debug
+                $('#codigo').val(response.codigo);
+                $('#btnGenerarCodigo').html('<i class="fas fa-magic me-1"></i>Generar');
+                $('#btnGenerarCodigo').prop('disabled', false);
+            },
+            error: function(xhr, status, error) {
+                console.log('Error en AJAX:', xhr.responseText); // Debug
+                alert('Error al generar el código: ' + (xhr.responseJSON?.error || 'Error desconocido'));
+                $('#btnGenerarCodigo').html('<i class="fas fa-magic me-1"></i>Generar');
+                $('#btnGenerarCodigo').prop('disabled', false);
+            }
+        });
+    }
+    
+    // Evento para el botón generar código
+    $('#btnGenerarCodigo').click(generarCodigo);
+    
+    // Generar código automáticamente cuando se selecciona una categoría
+    $('#categoria').change(function() {
+        if ($(this).val()) {
+            generarCodigo();
+        } else {
+            $('#codigo').val('');
+        }
+    });
+    
+    // Validación del formulario
+    $('form').submit(function(e) {
+        const nombre = $('#nombre').val().trim();
+        const categoria = $('#categoria').val();
+        
+        if (!nombre) {
+            e.preventDefault();
+            alert('Por favor, ingresa el nombre del producto');
+            $('#nombre').focus();
+            return false;
+        }
+        
+        if (!categoria) {
+            e.preventDefault();
+            alert('Por favor, selecciona una categoría');
+            $('#categoria').focus();
+            return false;
+        }
+        
+        // Si no hay código generado, generarlo automáticamente
+        const codigo = $('#codigo').val().trim();
+        if (!codigo) {
+            generarCodigo();
+            // Esperar un momento para que se genere el código antes de enviar
+            setTimeout(() => {
+                if ($('#codigo').val().trim()) {
+                    $('form').submit();
+                } else {
+                    alert('Error al generar el código automáticamente. Por favor, intenta de nuevo.');
+                }
+            }, 1000);
+            return false;
+        }
+        
+        // Mostrar indicador de carga
+        $('button[type="submit"]').html('<i class="fas fa-spinner fa-spin me-2"></i>Guardando...');
+        $('button[type="submit"]').prop('disabled', true);
+    });
+    
+    // Calcular valor total automáticamente
+    $('#cantidad, #precio_unitario').on('input', function() {
+        const cantidad = parseFloat($('#cantidad').val()) || 0;
+        const precio = parseFloat($('#precio_unitario').val()) || 0;
+        const total = cantidad * precio;
+        
+        // Mostrar el valor total en algún lugar si es necesario
+        console.log('Valor total:', total);
+    });
+    
+    // Manejar tipo de propiedad (propio/alquilado)
+    $('#tipo_propiedad').change(function() {
+        if ($(this).val() === 'alquilado') {
+            $('#codigo_alquiler_group').show();
+            $('#fechas_alquiler_group').show();
+            $('#codigo_alquiler').prop('required', true);
+            $('#fecha_alquiler').prop('required', true);
+            $('#fecha_vencimiento_alquiler').prop('required', true);
+            
+            // Para productos alquilados, permitir editar el código y usar el código de alquiler
+            $('#codigo').prop('readonly', false);
+            $('#codigo').attr('placeholder', 'Ingrese el código de alquiler');
+            $('#btnGenerarCodigo').hide();
+            $('#codigo_help_text').text('Para productos alquilados, ingrese el código de alquiler proporcionado');
+            
+            // Cuando se ingrese el código de alquiler, copiarlo al campo código
+            $('#codigo_alquiler').on('input', function() {
+                $('#codigo').val($(this).val());
+            });
+        } else {
+            $('#codigo_alquiler_group').hide();
+            $('#fechas_alquiler_group').hide();
+            $('#codigo_alquiler').prop('required', false);
+            $('#fecha_alquiler').prop('required', false);
+            $('#fecha_vencimiento_alquiler').prop('required', false);
+            $('#codigo_alquiler').val('');
+            $('#fecha_alquiler').val('');
+            $('#fecha_vencimiento_alquiler').val('');
+            
+            // Para productos propios, el código es readonly y se genera automáticamente
+            $('#codigo').prop('readonly', true);
+            $('#codigo').attr('placeholder', 'Se generará automáticamente');
+            $('#btnGenerarCodigo').show();
+            $('#codigo_help_text').text('Código único generado automáticamente basado en la categoría');
+            
+            // Limpiar el campo código
+            $('#codigo').val('');
+        }
+    });
+    
+    // Manejar checkbox de antivirus
+    $('#antivirus').change(function() {
+        if ($(this).is(':checked')) {
+            $('#antivirus_details').show();
+            $('#antivirus_nombre').prop('required', true);
+        } else {
+            $('#antivirus_details').hide();
+            $('#antivirus_nombre').prop('required', false);
+            $('#antivirus_nombre').val('');
+        }
+    });
+    
+    // Cargar áreas cuando se selecciona una sede
+    $('#sede').change(function() {
+        const sedeId = $(this).val();
+        const areaSelect = $('#area');
+        const personalSelect = $('#personal_asignado');
+        
+        console.log('🔄 Sede seleccionada:', sedeId); // Debug
+        
+        // Limpiar opciones
+        areaSelect.html('<option value="">Seleccione un área</option>');
+        personalSelect.html('<option value="">Sin asignar</option>');
+        
+        if (sedeId) {
+            // Mostrar indicador de carga
+            areaSelect.html('<option value="">Cargando áreas...</option>');
+            
+            // Obtener CSRF token
+            const csrfToken = $('[name=csrfmiddlewaretoken]').val();
+            console.log('CSRF Token:', csrfToken ? '✅ Presente' : '❌ No encontrado'); // Debug
+            
+            // Cargar áreas de la sede
+            $.ajax({
+                url: '/api/areas-por-sede/',
+                method: 'POST',
+                data: JSON.stringify({ sede_id: sedeId }),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                beforeSend: function() {
+                    console.log('🚀 Enviando petición para cargar áreas...'); // Debug
+                },
+                success: function(response) {
+                    console.log('✅ Respuesta API áreas exitosa:', response); // Debug
+                    areaSelect.html('<option value="">Seleccione un área</option>');
+                    if (response.areas && response.areas.length > 0) {
+                        response.areas.forEach(function(area) {
+                            areaSelect.append(`<option value="${area.id}">${area.nombre}</option>`);
+                        });
+                        console.log(`✅ Cargadas ${response.areas.length} áreas`); // Debug
+                    } else {
+                        areaSelect.html('<option value="">No hay áreas disponibles</option>');
+                        console.log('⚠️ No se encontraron áreas para esta sede'); // Debug
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Error al cargar áreas:', error); // Debug
+                    console.error('Status:', xhr.status); // Debug
+                    console.error('Respuesta del servidor:', xhr.responseText); // Debug
+                    
+                    // Mostrar mensaje más específico según el error
+                    let errorMessage = 'Error al cargar áreas';
+                    if (xhr.status === 403) {
+                        errorMessage = 'Error: No tienes permisos para acceder a esta información';
+                    } else if (xhr.status === 401) {
+                        errorMessage = 'Error: Debes iniciar sesión para acceder a esta información';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Error del servidor al cargar áreas';
+                    }
+                    
+                    areaSelect.html(`<option value="">${errorMessage}</option>`);
+                    alert(`Error al cargar áreas: ${errorMessage}`);
+                }
+            });
+        }
+    });
+    
+    // Cargar personal cuando se selecciona un área
+    $('#area').change(function() {
+        const areaId = $(this).val();
+        const personalSelect = $('#personal_asignado');
+        
+        console.log('🔄 Área seleccionada:', areaId); // Debug
+        
+        // Limpiar opciones
+        personalSelect.html('<option value="">Sin asignar</option>');
+        
+        if (areaId) {
+            // Mostrar indicador de carga
+            personalSelect.html('<option value="">Cargando personal...</option>');
+            
+            // Obtener CSRF token
+            const csrfToken = $('[name=csrfmiddlewaretoken]').val();
+            console.log('CSRF Token:', csrfToken ? '✅ Presente' : '❌ No encontrado'); // Debug
+            
+            // Cargar personal del área
+            $.ajax({
+                url: '/api/personal-por-area/',
+                method: 'POST',
+                data: JSON.stringify({ area_id: areaId }),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                beforeSend: function() {
+                    console.log('🚀 Enviando petición para cargar personal...'); // Debug
+                },
+                success: function(response) {
+                    console.log('✅ Respuesta API personal exitosa:', response); // Debug
+                    personalSelect.html('<option value="">Sin asignar</option>');
+                    if (response.personal && response.personal.length > 0) {
+                        response.personal.forEach(function(persona) {
+                            personalSelect.append(`<option value="${persona.id}">${persona.nombre} ${persona.apellido}</option>`);
+                        });
+                        console.log(`✅ Cargadas ${response.personal.length} personas`); // Debug
+                    } else {
+                        personalSelect.html('<option value="">No hay personal disponible</option>');
+                        console.log('⚠️ No se encontró personal para esta área'); // Debug
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Error al cargar personal:', error); // Debug
+                    console.error('Status:', xhr.status); // Debug
+                    console.error('Respuesta del servidor:', xhr.responseText); // Debug
+                    
+                    // Mostrar mensaje más específico según el error
+                    let errorMessage = 'Error al cargar personal';
+                    if (xhr.status === 403) {
+                        errorMessage = 'Error: No tienes permisos para acceder a esta información';
+                    } else if (xhr.status === 401) {
+                        errorMessage = 'Error: Debes iniciar sesión para acceder a esta información';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Error del servidor al cargar personal';
+                    }
+                    
+                    personalSelect.html(`<option value="">${errorMessage}</option>`);
+                    alert(`Error al cargar personal: ${errorMessage}`);
+                }
+            });
+        }
+    });
+    
+    // Botón de prueba para verificar APIs
+    $('#btnTestAPI').click(function() {
+        console.log('🧪 Iniciando prueba de APIs...');
+        
+        // Probar API de áreas por sede
+        const sedeId = 2; // ID de PRADERAS
+        const csrfToken = $('[name=csrfmiddlewaretoken]').val();
+        
+        console.log('🔍 Probando API áreas por sede...');
+        $.ajax({
+            url: '/api/areas-por-sede/',
+            method: 'POST',
+            data: JSON.stringify({ sede_id: sedeId }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                console.log('✅ API áreas por sede funciona:', response);
+                alert(`✅ API áreas por sede funciona correctamente.\nEncontradas: ${response.areas.length} áreas`);
+                
+                // Probar API de personal por área
+                if (response.areas.length > 0) {
+                    const areaId = response.areas[0].id;
+                    console.log('🔍 Probando API personal por área...');
+                    $.ajax({
+                        url: '/api/personal-por-area/',
+                        method: 'POST',
+                        data: JSON.stringify({ area_id: areaId }),
+                        contentType: 'application/json',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(response2) {
+                            console.log('✅ API personal por área funciona:', response2);
+                            alert(`✅ API personal por área funciona correctamente.\nEncontradas: ${response2.personal.length} personas`);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('❌ Error en API personal:', xhr.responseText);
+                            alert(`❌ Error en API personal: ${xhr.status} - ${error}`);
+                        }
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('❌ Error en API áreas:', xhr.responseText);
+                alert(`❌ Error en API áreas: ${xhr.status} - ${error}`);
+            }
+        });
+    });
+}); // <-- Cierra $(document).ready correctamente
+} // <-- Cierra initializeApp
+// Iniciar la verificación de jQuery
+waitForJQuery();
+</script>
+{% endblock %} 

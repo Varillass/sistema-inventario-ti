@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Cuentas - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-user-shield text-primary me-2"></i>
+                Gestión de Cuentas
+            </h1>
+            <p class="text-muted">Administra las cuentas de servicios y plataformas</p>
+        </div>
+        <div>
+            <a href="{% url 'inventario:crear_cuenta' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Nueva Cuenta
+            </a>
+            <a href="{% url 'inventario:gestion_cuentas' %}" class="btn btn-info">
+                <i class="fas fa-chart-line me-2"></i>Gestión Avanzada
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Total Cuentas</h6>
+                            <h3 class="text-white mb-0">{{ total_cuentas }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-shield fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Activas</h6>
+                            <h3 class="text-white mb-0">{{ cuentas_activas }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Próximo Vencimiento</h6>
+                            <h3 class="text-white mb-0">{{ cuentas_proximo_vencimiento }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Vencidas</h6>
+                            <h3 class="text-white mb-0">{{ cuentas_vencidas }}</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>Filtros
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="tipo_cuenta" class="form-label">Tipo de Cuenta</label>
+                    <select name="tipo_cuenta" id="tipo_cuenta" class="form-select">
+                        <option value="">Todos los tipos</option>
+                        {% for tipo_cuenta in tipos_cuenta %}
+                            <option value="{{ tipo_cuenta.0 }}" {% if filtros.tipo_cuenta == tipo_cuenta.0 %}selected{% endif %}>
+                                {{ tipo_cuenta.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">Todos los estados</option>
+                        {% for estado in estados_cuenta %}
+                            <option value="{{ estado.0 }}" {% if filtros.estado == estado.0 %}selected{% endif %}>
+                                {{ estado.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="sede" class="form-label">Sede</label>
+                    <select name="sede" id="sede" class="form-select">
+                        <option value="">Todas las sedes</option>
+                        {% for sede in sedes %}
+                            <option value="{{ sede.id }}" {% if filtros.sede_id == sede.id|stringformat:"s" %}selected{% endif %}>
+                                {{ sede.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Cuentas -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Lista de Cuentas
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-hover" id="cuentasTable">
+                        <thead>
+                            <tr>
+                                <th>Cuenta</th>
+                                <th>Tipo</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th>Vencimiento</th>
+                                <th>Asignado a</th>
+                                <th>Costo Mensual</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cuenta in page_obj %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ cuenta.nombre }}</strong>
+                                        {% if cuenta.url_acceso %}
+                                            <br><small class="text-muted">
+                                                <a href="{{ cuenta.url_acceso }}" target="_blank" class="text-decoration-none">
+                                                    <i class="fas fa-external-link-alt me-1"></i>Acceder
+                                                </a>
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ cuenta.get_tipo_cuenta_display }}</span>
+                                    </td>
+                                    <td>{{ cuenta.email }}</td>
+                                    <td>
+                                        {% if cuenta.estado == 'activa' %}
+                                            <span class="badge bg-success">{{ cuenta.get_estado_display }}</span>
+                                        {% elif cuenta.estado == 'inactiva' %}
+                                            <span class="badge bg-secondary">{{ cuenta.get_estado_display }}</span>
+                                        {% elif cuenta.estado == 'suspendida' %}
+                                            <span class="badge bg-warning">{{ cuenta.get_estado_display }}</span>
+                                        {% elif cuenta.estado == 'vencida' %}
+                                            <span class="badge bg-danger">{{ cuenta.get_estado_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if cuenta.fecha_vencimiento %}
+                                            {% if cuenta.estado_vencimiento == 'vencida' %}
+                                                <span class="text-danger">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                                    Vencida
+                                                </span>
+                                            {% elif cuenta.estado_vencimiento == 'proximo_vencimiento' %}
+                                                <span class="text-warning">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-success">
+                                                    <i class="fas fa-check me-1"></i>
+                                                    {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">Sin fecha</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if cuenta.personal_asignado %}
+                                            {{ cuenta.personal_asignado.get_full_name }}
+                                            {% if cuenta.area %}
+                                                <br><small class="text-muted">{{ cuenta.area.nombre }}</small>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">Sin asignar</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if cuenta.costo_mensual %}
+                                            ${{ cuenta.costo_mensual|floatformat:2 }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'inventario:detalle_cuenta' cuenta.id %}" 
+                                               class="btn btn-sm btn-outline-info" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'inventario:editar_cuenta' cuenta.id %}" 
+                                               class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'inventario:eliminar_cuenta' cuenta.id %}" 
+                                               class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Paginación de cuentas">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if filtros.tipo_cuenta %}&tipo_cuenta={{ filtros.tipo_cuenta }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.sede_id %}&sede={{ filtros.sede_id }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtros.tipo_cuenta %}&tipo_cuenta={{ filtros.tipo_cuenta }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.sede_id %}&sede={{ filtros.sede_id }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if filtros.tipo_cuenta %}&tipo_cuenta={{ filtros.tipo_cuenta }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.sede_id %}&sede={{ filtros.sede_id }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtros.tipo_cuenta %}&tipo_cuenta={{ filtros.tipo_cuenta }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.sede_id %}&sede={{ filtros.sede_id }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if filtros.tipo_cuenta %}&tipo_cuenta={{ filtros.tipo_cuenta }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}{% if filtros.sede_id %}&sede={{ filtros.sede_id }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-user-shield fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay cuentas registradas</h5>
+                    <p class="text-muted">Comienza creando tu primera cuenta</p>
+                    <a href="{% url 'inventario:crear_cuenta' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Crear Cuenta
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Inicializar DataTable
+    $('#cuentasTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+        },
+        "pageLength": 20,
+        "order": [[0, "asc"]],
+        "autoWidth": false,
+        "responsive": true
+    });
+});
+</script>
+{% endblock %} 

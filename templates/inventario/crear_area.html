@@ -1,0 +1,70 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Crear Área{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Crear Nueva Área</h1>
+        <a href="{% url 'inventario:lista_areas' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Información de la Área</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}">Nombre de la Área *</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.sede.id_for_label }}">Sede *</label>
+                            {{ form.sede }}
+                            {% if form.sede.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.sede.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.descripcion.id_for_label }}">Descripción</label>
+                    {{ form.descripcion }}
+                    {% if form.descripcion.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.descripcion.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Área
+                    </button>
+                    <a href="{% url 'inventario:lista_areas' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

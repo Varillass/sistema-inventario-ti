@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Movimiento - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-exchange-alt"></i> Detalle de Movimiento #{{ movimiento.id }}
+        </h1>
+        <div class="btn-group" role="group">
+            <a href="{% url 'inventario:editar_movimiento' movimiento.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'inventario:lista_movimientos' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Información del Movimiento -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información del Movimiento</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold">Información General</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>ID:</strong></td>
+                                    <td>{{ movimiento.id }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fecha:</strong></td>
+                                    <td>{{ movimiento.fecha_movimiento|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tipo:</strong></td>
+                                    <td>
+                                        <span class="badge {% if movimiento.tipo_movimiento.es_entrada %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ movimiento.tipo_movimiento.nombre }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cantidad:</strong></td>
+                                    <td>
+                                        <span class="{% if movimiento.tipo_movimiento.es_entrada %}text-success{% else %}text-danger{% endif %}">
+                                            {% if movimiento.tipo_movimiento.es_entrada %}+{% else %}-{% endif %}{{ movimiento.cantidad }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Usuario:</strong></td>
+                                    <td>{{ movimiento.usuario.get_full_name }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold">Producto</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Nombre:</strong></td>
+                                    <td>
+                                        <a href="{% url 'inventario:detalle_producto' movimiento.producto.id %}">
+                                            {{ movimiento.producto.nombre }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Código:</strong></td>
+                                    <td>{{ movimiento.producto.codigo }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Categoría:</strong></td>
+                                    <td>{{ movimiento.producto.categoria.nombre }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Stock Actual:</strong></td>
+                                    <td>
+                                        <span class="badge {% if movimiento.producto.cantidad < 5 %}bg-danger{% elif movimiento.producto.cantidad < 10 %}bg-warning{% else %}bg-success{% endif %}">
+                                            {{ movimiento.producto.cantidad }} unidades
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    {% if movimiento.motivo %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="font-weight-bold">Motivo</h6>
+                            <p class="text-muted">{{ movimiento.motivo }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Ubicaciones -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ubicaciones</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="font-weight-bold text-success">Origen</h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td><strong>Sede:</strong></td>
+                                    <td>{{ movimiento.sede_origen.nombre|default:"No especificada" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Área:</strong></td>
+                                    <td>{{ movimiento.area_origen.nombre|default:"No especificada" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Personal:</strong></td>
+                                    <td>{{ movimiento.personal_origen.get_full_name|default:"No especificado" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="font-weight-bold text-primary">Destino</h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td><strong>Sede:</strong></td>
+                                    <td>{{ movimiento.sede_destino.nombre|default:"No especificada" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Área:</strong></td>
+                                    <td>{{ movimiento.area_destino.nombre|default:"No especificada" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Personal:</strong></td>
+                                    <td>{{ movimiento.personal_destino.get_full_name|default:"No especificado" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

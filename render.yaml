@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: sistema-inventario-ti
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn sistema_inventario_ti.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: LICENSE_ENCRYPTION_KEY
+        generateValue: true
+      - key: ACCOUNT_ENCRYPTION_KEY
+        generateValue: true
+    healthCheckPath: /
+    autoDeploy: true 

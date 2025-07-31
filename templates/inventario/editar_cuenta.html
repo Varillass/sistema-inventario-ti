@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Cuenta - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-edit text-primary me-2"></i>
+                Editar Cuenta
+            </h1>
+            <p class="text-muted">Modifica la información de la cuenta: {{ cuenta.nombre }}</p>
+        </div>
+        <div>
+            <a href="{% url 'inventario:lista_cuentas' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+            <a href="{% url 'inventario:detalle_cuenta' cuenta.id %}" class="btn btn-info">
+                <i class="fas fa-eye me-2"></i>Ver Detalles
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Información de la Cuenta
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Información básica -->
+                            <div class="col-md-6">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>Información Básica
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                        Nombre de la Cuenta <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.nombre }}
+                                    {% if form.nombre.errors %}
+                                        <div class="text-danger small">{{ form.nombre.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.tipo_cuenta.id_for_label }}" class="form-label">
+                                        Tipo de Cuenta <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.tipo_cuenta }}
+                                    {% if form.tipo_cuenta.errors %}
+                                        <div class="text-danger small">{{ form.tipo_cuenta.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                                        Email <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.usuario.id_for_label }}" class="form-label">
+                                        Usuario <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.usuario }}
+                                    {% if form.usuario.errors %}
+                                        <div class="text-danger small">{{ form.usuario.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.password_plana.id_for_label }}" class="form-label">
+                                        Contraseña
+                                    </label>
+                                    {{ form.password_plana }}
+                                    {% if form.password_plana.help_text %}
+                                        <div class="form-text">{{ form.password_plana.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.password_plana.errors %}
+                                        <div class="text-danger small">{{ form.password_plana.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Deja en blanco para mantener la contraseña actual</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.url_acceso.id_for_label }}" class="form-label">
+                                        URL de Acceso
+                                    </label>
+                                    {{ form.url_acceso }}
+                                    {% if form.url_acceso.errors %}
+                                        <div class="text-danger small">{{ form.url_acceso.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Información adicional -->
+                            <div class="col-md-6">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-calendar-alt me-2"></i>Fechas y Estado
+                                </h6>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.fecha_creacion_cuenta.id_for_label }}" class="form-label">
+                                        Fecha de Creación
+                                    </label>
+                                    {{ form.fecha_creacion_cuenta }}
+                                    {% if form.fecha_creacion_cuenta.errors %}
+                                        <div class="text-danger small">{{ form.fecha_creacion_cuenta.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.fecha_vencimiento.id_for_label }}" class="form-label">
+                                        Fecha de Vencimiento
+                                    </label>
+                                    {{ form.fecha_vencimiento }}
+                                    {% if form.fecha_vencimiento.errors %}
+                                        <div class="text-danger small">{{ form.fecha_vencimiento.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                        Estado <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.estado }}
+                                    {% if form.estado.errors %}
+                                        <div class="text-danger small">{{ form.estado.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <h6 class="text-primary mb-3 mt-4">
+                                    <i class="fas fa-users me-2"></i>Asignación
+                                </h6>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.personal_asignado.id_for_label }}" class="form-label">
+                                        Personal Asignado
+                                    </label>
+                                    {{ form.personal_asignado }}
+                                    {% if form.personal_asignado.errors %}
+                                        <div class="text-danger small">{{ form.personal_asignado.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.sede.id_for_label }}" class="form-label">
+                                        Sede
+                                    </label>
+                                    {{ form.sede }}
+                                    {% if form.sede.errors %}
+                                        <div class="text-danger small">{{ form.sede.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.area.id_for_label }}" class="form-label">
+                                        Área
+                                    </label>
+                                    {{ form.area }}
+                                    {% if form.area.errors %}
+                                        <div class="text-danger small">{{ form.area.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Información de suscripción -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-credit-card me-2"></i>Información de Suscripción
+                                </h6>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.plan_suscripcion.id_for_label }}" class="form-label">
+                                        Plan de Suscripción
+                                    </label>
+                                    {{ form.plan_suscripcion }}
+                                    {% if form.plan_suscripcion.errors %}
+                                        <div class="text-danger small">{{ form.plan_suscripcion.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.costo_mensual.id_for_label }}" class="form-label">
+                                        Costo Mensual
+                                    </label>
+                                    {{ form.costo_mensual }}
+                                    {% if form.costo_mensual.errors %}
+                                        <div class="text-danger small">{{ form.costo_mensual.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.proveedor.id_for_label }}" class="form-label">
+                                        Proveedor
+                                    </label>
+                                    {{ form.proveedor }}
+                                    {% if form.proveedor.errors %}
+                                        <div class="text-danger small">{{ form.proveedor.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Observaciones -->
+                        <div class="mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                Observaciones
+                            </label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.errors %}
+                                <div class="text-danger small">{{ form.observaciones.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'inventario:lista_cuentas' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Actualizar Cuenta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Información de la Cuenta
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Estado Actual:</strong>
+                        {% if cuenta.estado == 'activa' %}
+                            <span class="badge bg-success">{{ cuenta.get_estado_display }}</span>
+                        {% elif cuenta.estado == 'inactiva' %}
+                            <span class="badge bg-secondary">{{ cuenta.get_estado_display }}</span>
+                        {% elif cuenta.estado == 'suspendida' %}
+                            <span class="badge bg-warning">{{ cuenta.get_estado_display }}</span>
+                        {% elif cuenta.estado == 'vencida' %}
+                            <span class="badge bg-danger">{{ cuenta.get_estado_display }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if cuenta.fecha_vencimiento %}
+                        <div class="mb-3">
+                            <strong>Vencimiento:</strong><br>
+                            {% if cuenta.estado_vencimiento == 'vencida' %}
+                                <span class="text-danger">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Vencida el {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                </span>
+                            {% elif cuenta.estado_vencimiento == 'proximo_vencimiento' %}
+                                <span class="text-warning">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Vence el {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                </span>
+                            {% else %}
+                                <span class="text-success">
+                                    <i class="fas fa-check me-1"></i>
+                                    Vence el {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if cuenta.personal_asignado %}
+                        <div class="mb-3">
+                            <strong>Asignado a:</strong><br>
+                            {{ cuenta.personal_asignado.get_full_name }}
+                            {% if cuenta.area %}
+                                <br><small class="text-muted">{{ cuenta.area.nombre }}</small>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if cuenta.costo_mensual %}
+                        <div class="mb-3">
+                            <strong>Costo Mensual:</strong><br>
+                            <span class="text-primary">${{ cuenta.costo_mensual|floatformat:2 }}</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-shield-alt me-2"></i>Seguridad</h6>
+                        <p class="mb-0 small">La contraseña actual está encriptada. Solo completa el campo si deseas cambiarla.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Hacer que el campo area dependa de la sede seleccionada
+    $('#id_sede').change(function() {
+        var sedeId = $(this).val();
+        var areaSelect = $('#id_area');
+        
+        // Limpiar opciones actuales
+        areaSelect.empty();
+        areaSelect.append('<option value="">Seleccione un área</option>');
+        
+        if (sedeId) {
+            // Hacer petición AJAX para obtener áreas de la sede
+            $.ajax({
+                url: "{% url 'inventario:api_areas_por_sede' %}",
+                data: {
+                    'sede_id': sedeId
+                },
+                success: function(data) {
+                    $.each(data.areas, function(index, area) {
+                        areaSelect.append(
+                            $('<option></option>').val(area.id).text(area.nombre)
+                        );
+                    });
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %} 

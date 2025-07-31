@@ -1,0 +1,207 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Editar Licencia{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Editar Licencia</h1>
+        <a href="{% url 'inventario:lista_licencias' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left fa-sm"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Información de la Licencia</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nombre">Nombre de la Licencia *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   value="{{ licencia.nombre }}" required>
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tipo">Tipo de Licencia *</label>
+                            <select class="form-control" id="tipo" name="tipo" required>
+                                <option value="">Selecciona el tipo</option>
+                                <option value="perpetua" {% if licencia.tipo == 'perpetua' %}selected{% endif %}>Perpetua</option>
+                                <option value="anual" {% if licencia.tipo == 'anual' %}selected{% endif %}>Anual</option>
+                                <option value="mensual" {% if licencia.tipo == 'mensual' %}selected{% endif %}>Mensual</option>
+                                <option value="otro" {% if licencia.tipo == 'otro' %}selected{% endif %}>Otro</option>
+                            </select>
+                            {% if form.tipo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tipo_distribucion">Tipo de Distribución *</label>
+                            <select class="form-control" id="tipo_distribucion" name="tipo_distribucion" required>
+                                <option value="">Selecciona el tipo de distribución</option>
+                                <option value="oem" {% if licencia.tipo_distribucion == 'oem' %}selected{% endif %}>OEM</option>
+                                <option value="retail" {% if licencia.tipo_distribucion == 'retail' %}selected{% endif %}>Retail</option>
+                                <option value="volume" {% if licencia.tipo_distribucion == 'volume' %}selected{% endif %}>Volume License</option>
+                                <option value="otro" {% if licencia.tipo_distribucion == 'otro' %}selected{% endif %}>Otro</option>
+                            </select>
+                            {% if form.tipo_distribucion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo_distribucion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="proveedor">Proveedor</label>
+                            <input type="text" class="form-control" id="proveedor" name="proveedor" 
+                                   value="{{ licencia.proveedor }}">
+                            {% if form.proveedor.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.proveedor.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="cantidad_licencias">Cantidad de Licencias *</label>
+                            <input type="number" class="form-control" id="cantidad_licencias" name="cantidad_licencias" 
+                                   value="{{ licencia.cantidad_licencias }}" min="1" required>
+                            {% if form.cantidad_licencias.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.cantidad_licencias.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="licencias_disponibles">Licencias Disponibles *</label>
+                            <input type="number" class="form-control" id="licencias_disponibles" name="licencias_disponibles" 
+                                   value="{{ licencia.licencias_disponibles }}" min="0" required>
+                            {% if form.licencias_disponibles.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.licencias_disponibles.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="fecha_adquisicion">Fecha de Adquisición</label>
+                            <input type="date" class="form-control" id="fecha_adquisicion" name="fecha_adquisicion" 
+                                   value="{{ licencia.fecha_adquisicion|date:'Y-m-d' }}">
+                            {% if form.fecha_adquisicion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha_adquisicion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="fecha_vencimiento">Fecha de Vencimiento</label>
+                            <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento" 
+                                   value="{{ licencia.fecha_vencimiento|date:'Y-m-d' }}">
+                            {% if form.fecha_vencimiento.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha_vencimiento.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="precio">Precio</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">$</span>
+                                </div>
+                                <input type="number" class="form-control" id="precio" name="precio" 
+                                       value="{{ licencia.precio }}" step="0.01" min="0">
+                            </div>
+                            {% if form.precio.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.precio.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="clave_licencia_plana">Clave de Licencia</label>
+                            <input type="password" class="form-control" id="clave_licencia_plana" name="clave_licencia_plana" 
+                                   placeholder="Dejar en blanco para mantener la actual">
+                            <small class="form-text text-muted">La clave será encriptada automáticamente</small>
+                            {% if form.clave_licencia_plana.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.clave_licencia_plana.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea class="form-control" id="observaciones" name="observaciones" 
+                              rows="3">{{ licencia.observaciones }}</textarea>
+                    {% if form.observaciones.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.observaciones.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="activo" name="activo" 
+                               {% if licencia.activo %}checked{% endif %}>
+                        <label class="custom-control-label" for="activo">
+                            Licencia activa
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Actualizar Licencia
+                    </button>
+                    <a href="{% url 'inventario:lista_licencias' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

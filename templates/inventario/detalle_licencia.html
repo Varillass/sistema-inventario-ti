@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Licencia - {{ licencia.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Detalle de Licencia</h1>
+        <div>
+            <a href="{% url 'inventario:editar_licencia' licencia.id %}" class="btn btn-info btn-sm me-2">
+                <i class="fas fa-edit fa-sm"></i> Editar
+            </a>
+            <a href="{% url 'inventario:lista_licencias' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left fa-sm"></i> Volver a Licencias
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Información de la Licencia -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-key"></i> Información de la Licencia
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nombre:</strong> {{ licencia.nombre }}</p>
+                            <p><strong>Tipo:</strong> 
+                                <span class="badge bg-info">{{ licencia.get_tipo_display }}</span>
+                            </p>
+                            <p><strong>Distribución:</strong> 
+                                {% if licencia.tipo_distribucion == 'oem' %}
+                                    <span class="badge bg-warning">OEM</span>
+                                {% elif licencia.tipo_distribucion == 'retail' %}
+                                    <span class="badge bg-primary">Retail</span>
+                                {% elif licencia.tipo_distribucion == 'volume' %}
+                                    <span class="badge bg-secondary">Volume</span>
+                                {% else %}
+                                    <span class="badge bg-dark">{{ licencia.get_tipo_distribucion_display }}</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Proveedor:</strong> {{ licencia.proveedor|default:"No especificado" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Fecha de Adquisición:</strong> 
+                                {{ licencia.fecha_adquisicion|date:"d/m/Y"|default:"No especificada" }}
+                            </p>
+                            <p><strong>Fecha de Vencimiento:</strong> 
+                                {% if licencia.fecha_vencimiento %}
+                                    {% if licencia.fecha_vencimiento < today %}
+                                        <span class="text-danger">{{ licencia.fecha_vencimiento|date:"d/m/Y" }}</span>
+                                    {% else %}
+                                        {{ licencia.fecha_vencimiento|date:"d/m/Y" }}
+                                    {% endif %}
+                                {% else %}
+                                    No especificada
+                                {% endif %}
+                            </p>
+                            <p><strong>Precio:</strong> 
+                                {% if licencia.precio %}
+                                    ${{ licencia.precio }}
+                                {% else %}
+                                    No especificado
+                                {% endif %}
+                            </p>
+                            <p><strong>Estado:</strong> 
+                                {% if licencia.activo %}
+                                    <span class="badge bg-success">Activa</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactiva</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% if licencia.observaciones %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <p><strong>Observaciones:</strong></p>
+                                <p class="text-muted">{{ licencia.observaciones }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if licencia.clave_licencia %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <p><strong>Clave de Licencia:</strong></p>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="licenseKey" value="••••••••••••••••" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="toggleLicenseKey()">
+                                            <i class="fas fa-eye" id="eyeIcon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">La clave está encriptada. Haz clic en el ojo para verla.</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas de la Licencia -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-chart-pie"></i> Estadísticas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-right">
+                                <h4 class="text-primary">{{ licencia.cantidad_licencias }}</h4>
+                                <p class="small text-muted">Total de Licencias</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <h4 class="text-success">{{ licencia.licencias_disponibles }}</h4>
+                                <p class="small text-muted">Disponibles</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-12">
+                            <div>
+                                <h4 class="text-info">{{ productos_asignados.count }}</h4>
+                                <p class="small text-muted">Productos Asignados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos Asignados -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-laptop"></i> Productos con esta Licencia Asignada
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if productos_asignados %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th>Personal Asignado</th>
+                                <th>Fecha de Asignación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos_asignados %}
+                                <tr>
+                                    <td>{{ producto.codigo }}</td>
+                                    <td>{{ producto.nombre }}</td>
+                                    <td>{{ producto.categoria.nombre }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if producto.estado == 'activo' %}success{% elif producto.estado == 'inactivo' %}danger{% else %}warning{% endif %}">
+                                            {{ producto.get_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if producto.sede and producto.area %}
+                                            {{ producto.sede.nombre }} - {{ producto.area.nombre }}
+                                        {% elif producto.sede %}
+                                            {{ producto.sede.nombre }}
+                                        {% else %}
+                                            {{ producto.ubicacion|default:"No especificada" }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if producto.personal_asignado %}
+                                            {{ producto.personal_asignado.get_full_name }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% for asignacion in asignaciones %}
+                                            {% if asignacion.producto == producto %}
+                                                {{ asignacion.fecha_asignacion|date:"d/m/Y H:i" }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'inventario:detalle_producto' producto.id %}" class="btn btn-sm btn-primary" title="Ver producto">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'inventario:quitar_licencia_producto' producto.id licencia.id %}" 
+                                           class="btn btn-sm btn-danger" title="Quitar licencia"
+                                           onclick="return confirm('¿Estás seguro de que quieres quitar esta licencia del producto?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-laptop fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-500">No hay productos asignados a esta licencia</h5>
+                    <p class="text-gray-400">Esta licencia no está asignada a ningún producto actualmente</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Historial de Asignaciones -->
+    {% if asignaciones %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-history"></i> Historial de Asignaciones
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Fecha de Asignación</th>
+                                <th>Observaciones</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asignacion in asignaciones %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inventario:detalle_producto' asignacion.producto.id %}">
+                                            {{ asignacion.producto.codigo }} - {{ asignacion.producto.nombre }}
+                                        </a>
+                                    </td>
+                                    <td>{{ asignacion.fecha_asignacion|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ asignacion.observaciones|default:"-" }}</td>
+                                    <td>
+                                        {% if asignacion.activo %}
+                                            <span class="badge bg-success">Activa</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactiva</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleLicenseKey() {
+    const input = document.getElementById('licenseKey');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    if (input.type === 'password') {
+        // Hacer petición AJAX para obtener la clave desencriptada
+        fetch('{% url "inventario:api_get_license_key" licencia.id %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    input.type = 'text';
+                    input.value = data.key;
+                    eyeIcon.className = 'fas fa-eye-slash';
+                } else {
+                    alert('Error al obtener la clave de licencia');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al obtener la clave de licencia');
+            });
+    } else {
+        input.type = 'password';
+        input.value = '••••••••••••••••';
+        eyeIcon.className = 'fas fa-eye';
+    }
+}
+</script>
+{% endblock %} 

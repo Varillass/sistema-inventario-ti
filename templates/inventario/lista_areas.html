@@ -1,0 +1,91 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Áreas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gestión de Áreas</h1>
+        <a href="{% url 'inventario:crear_area' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus fa-sm"></i> Nueva Área
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Áreas</h6>
+        </div>
+        <div class="card-body">
+            {% if areas %}
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Sede</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for area in areas %}
+                            <tr>
+                                <td>{{ area.nombre }}</td>
+                                <td>{{ area.sede.nombre }}</td>
+                                <td>{{ area.descripcion|default:"-" }}</td>
+                                <td>
+                                    {% if area.activo %}
+                                        <span class="badge badge-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'inventario:editar_area' area.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-danger" 
+                                       onclick="confirmarEliminacion('{{ area.nombre }}', '{% url 'inventario:eliminar_area' area.id %}')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-building fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-500">No hay áreas registradas</h5>
+                    <p class="text-gray-400">Comienza agregando una nueva área</p>
+                    <a href="{% url 'inventario:crear_area' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Primera Área
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmarEliminacion(nombre, url) {
+    if (confirm(`¿Estás seguro de que quieres eliminar el área "${nombre}"?`)) {
+        window.location.href = url;
+    }
+}
+</script>
+{% endblock %} 

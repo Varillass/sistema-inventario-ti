@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Producto{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-edit"></i> Editar Producto
+        </h1>
+        <div>
+            <a href="{% url 'inventario:detalle_producto' producto.id %}" class="btn btn-info">
+                <i class="fas fa-eye"></i> Ver Detalles
+            </a>
+            <a href="{% url 'inventario:lista_productos' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Información del Producto</h6>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="editarProductoForm">
+                {% csrf_token %}
+                
+                <!-- Información Básica -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="codigo" class="form-label">
+                                <i class="fas fa-barcode me-1"></i>Código *
+                            </label>
+                            <div class="input-group">
+                                <input type="text" name="codigo" id="codigo" class="form-control" 
+                                       value="{{ producto.codigo }}" required>
+                                <button type="button" class="btn btn-outline-secondary" id="btnGenerarCodigo">
+                                    <i class="fas fa-magic"></i>
+                                </button>
+                            </div>
+                            <div class="form-text" id="codigo_help_text">Código único del producto</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Nombre *
+                            </label>
+                            <input type="text" name="nombre" id="nombre" class="form-control" 
+                                   value="{{ producto.nombre }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label">
+                                <i class="fas fa-folder me-1"></i>Categoría *
+                            </label>
+                            <select name="categoria" id="categoria" class="form-select" required>
+                                <option value="">Seleccione una categoría</option>
+                                {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" {% if producto.categoria.id == categoria.id %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tipo_propiedad" class="form-label">
+                                <i class="fas fa-handshake me-1"></i>Tipo de Propiedad *
+                            </label>
+                            <select name="tipo_propiedad" id="tipo_propiedad" class="form-select" required>
+                                <option value="propio" {% if producto.tipo_propiedad == 'propio' %}selected{% endif %}>Propio</option>
+                                <option value="alquilado" {% if producto.tipo_propiedad == 'alquilado' %}selected{% endif %}>Alquilado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" id="codigo_alquiler_group" style="display: {% if producto.tipo_propiedad == 'alquilado' %}block{% else %}none{% endif %};">
+                            <label for="codigo_alquiler" class="form-label">
+                                <i class="fas fa-key me-1"></i>Código de Alquiler
+                            </label>
+                            <input type="text" name="codigo_alquiler" id="codigo_alquiler" class="form-control" 
+                                   value="{{ producto.codigo_alquiler|default:'' }}" 
+                                   placeholder="Código proporcionado por el proveedor de alquiler">
+                        </div>
+                        
+                        <div class="row" id="fechas_alquiler_group" style="display: {% if producto.tipo_propiedad == 'alquilado' %}block{% else %}none{% endif %};">
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_alquiler" class="form-label">
+                                    <i class="fas fa-calendar-plus me-1"></i>Fecha de Inicio de Alquiler
+                                </label>
+                                <input type="date" class="form-control" id="fecha_alquiler" name="fecha_alquiler" 
+                                       value="{{ producto.fecha_alquiler|date:'Y-m-d'|default:'' }}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_vencimiento_alquiler" class="form-label">
+                                    <i class="fas fa-calendar-times me-1"></i>Fecha de Vencimiento de Alquiler
+                                </label>
+                                <input type="date" class="form-control" id="fecha_vencimiento_alquiler" name="fecha_vencimiento_alquiler" 
+                                       value="{{ producto.fecha_vencimiento_alquiler|date:'Y-m-d'|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="marca" class="form-label">
+                                <i class="fas fa-industry me-1"></i>Marca
+                            </label>
+                            <input type="text" name="marca" id="marca" class="form-control" 
+                                   value="{{ producto.marca|default:'' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="modelo" class="form-label">
+                                <i class="fas fa-cube me-1"></i>Modelo
+                            </label>
+                            <input type="text" name="modelo" id="modelo" class="form-control" 
+                                   value="{{ producto.modelo|default:'' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="serie" class="form-label">
+                                <i class="fas fa-hashtag me-1"></i>Número de Serie
+                            </label>
+                            <input type="text" name="serie" id="serie" class="form-control" 
+                                   value="{{ producto.serie|default:'' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cantidad" class="form-label">
+                                <i class="fas fa-boxes me-1"></i>Cantidad *
+                            </label>
+                            <input type="number" name="cantidad" id="cantidad" class="form-control" 
+                                   value="{{ producto.cantidad }}" min="0" step="1" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="estado" class="form-label">
+                                <i class="fas fa-info-circle me-1"></i>Estado *
+                            </label>
+                            <select name="estado" id="estado" class="form-select" required>
+                                <option value="">Seleccione el estado</option>
+                                <option value="activo" {% if producto.estado == 'activo' %}selected{% endif %}>Activo</option>
+                                <option value="inactivo" {% if producto.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="mantenimiento" {% if producto.estado == 'mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                                <option value="dañado" {% if producto.estado == 'dañado' %}selected{% endif %}>Dañado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información Económica -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="precio_unitario" class="form-label">
+                                <i class="fas fa-dollar-sign me-1"></i>Precio Unitario *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="precio_unitario" id="precio_unitario" class="form-control" 
+                                       value="{{ producto.precio_unitario|floatformat:2 }}" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="fecha_adquisicion" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Fecha de Adquisición
+                            </label>
+                            <input type="date" name="fecha_adquisicion" id="fecha_adquisicion" class="form-control" 
+                                   value="{{ producto.fecha_adquisicion|date:'Y-m-d'|default:'' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="proveedor" class="form-label">
+                                <i class="fas fa-truck me-1"></i>Proveedor
+                            </label>
+                            <input type="text" name="proveedor" id="proveedor" class="form-control" 
+                                   value="{{ producto.proveedor|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="garantia_hasta" class="form-label">
+                                <i class="fas fa-shield-alt me-1"></i>Garantía Hasta
+                            </label>
+                            <input type="date" name="garantia_hasta" id="garantia_hasta" class="form-control" 
+                                   value="{{ producto.garantia_hasta|date:'Y-m-d'|default:'' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ubicacion" class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>Ubicación
+                            </label>
+                            <input type="text" name="ubicacion" id="ubicacion" class="form-control" 
+                                   value="{{ producto.ubicacion|default:'' }}" placeholder="Ej: Almacén A, Estante 3">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Descripción
+                            </label>
+                            <textarea name="descripcion" id="descripcion" class="form-control" rows="3" 
+                                      placeholder="Descripción detallada del producto">{{ producto.descripcion|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Software y Sistema -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="sistema_operativo" class="form-label">
+                                <i class="fas fa-desktop me-1"></i>Sistema Operativo
+                            </label>
+                            <input type="text" name="sistema_operativo" id="sistema_operativo" class="form-control" 
+                                   value="{{ producto.sistema_operativo|default:'' }}" placeholder="Ej: Windows 10, Ubuntu 20.04">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" name="antivirus" id="antivirus" class="form-check-input" 
+                                       {% if producto.antivirus %}checked{% endif %}>
+                                <label for="antivirus" class="form-check-label">
+                                    <i class="fas fa-shield-virus me-1"></i>Antivirus Instalado
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="observaciones" class="form-label">
+                        <i class="fas fa-sticky-note me-1"></i>Observaciones
+                    </label>
+                    <textarea name="observaciones" id="observaciones" class="form-control" rows="3" 
+                              placeholder="Observaciones adicionales">{{ producto.observaciones|default:'' }}</textarea>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Valor Total:</strong> $<span id="valorTotal">{{ producto.valor_total|floatformat:2 }}</span>
+                    <small class="d-block mt-1">(Precio unitario × Cantidad)</small>
+                </div>
+                
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary me-2" onclick="history.back()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Configurar estado inicial basado en el tipo de propiedad
+    configurarCamposAlquiler();
+    
+    // Manejar cambios en el tipo de propiedad
+    $('#tipo_propiedad').on('change', function() {
+        configurarCamposAlquiler();
+    });
+    
+    function configurarCamposAlquiler() {
+        if ($('#tipo_propiedad').val() === 'alquilado') {
+            $('#codigo_alquiler_group').show();
+            $('#fechas_alquiler_group').show();
+            $('#codigo_alquiler').prop('required', true);
+            $('#fecha_alquiler').prop('required', true);
+            $('#fecha_vencimiento_alquiler').prop('required', true);
+            
+            // Para productos alquilados, permitir editar el código y usar el código de alquiler
+            $('#codigo').prop('readonly', false);
+            $('#codigo').attr('placeholder', 'Ingrese el código de alquiler');
+            $('#btnGenerarCodigo').hide();
+            $('#codigo_help_text').text('Para productos alquilados, ingrese el código de alquiler proporcionado');
+            
+            // Cuando se ingrese el código de alquiler, copiarlo al campo código
+            $('#codigo_alquiler').off('input').on('input', function() {
+                $('#codigo').val($(this).val());
+            });
+        } else {
+            $('#codigo_alquiler_group').hide();
+            $('#fechas_alquiler_group').hide();
+            $('#codigo_alquiler').prop('required', false);
+            $('#fecha_alquiler').prop('required', false);
+            $('#fecha_vencimiento_alquiler').prop('required', false);
+            $('#codigo_alquiler').val('');
+            $('#fecha_alquiler').val('');
+            $('#fecha_vencimiento_alquiler').val('');
+            
+            // Para productos propios, el código es readonly y se genera automáticamente
+            $('#codigo').prop('readonly', true);
+            $('#codigo').attr('placeholder', 'Se generará automáticamente');
+            $('#btnGenerarCodigo').show();
+            $('#codigo_help_text').text('Código único generado automáticamente basado en la categoría');
+        }
+    }
+    
+    // Calcular valor total automáticamente
+    $('#precio_unitario, #cantidad').on('input', function() {
+        calcularValorTotal();
+    });
+    
+    function calcularValorTotal() {
+        const precio = parseFloat($('#precio_unitario').val()) || 0;
+        const cantidad = parseInt($('#cantidad').val()) || 0;
+        const valorTotal = precio * cantidad;
+        $('#valorTotal').text(valorTotal.toFixed(2));
+    }
+    
+    // Generar código automáticamente
+    $('#btnGenerarCodigo').on('click', function() {
+        const categoria = $('#categoria').val();
+        if (categoria) {
+            $.ajax({
+                url: '{% url "inventario:api_generar_codigo" %}',
+                method: 'POST',
+                data: {
+                    categoria_id: categoria,
+                    csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#codigo').val(response.codigo);
+                    } else {
+                        alert('Error al generar código: ' + response.error);
+                    }
+                },
+                error: function() {
+                    alert('Error al generar código');
+                }
+            });
+        } else {
+            alert('Por favor seleccione una categoría primero');
+        }
+    });
+    
+    // Validación del formulario
+    $('#editarProductoForm').on('submit', function(e) {
+        const codigo = $('#codigo').val().trim();
+        const nombre = $('#nombre').val().trim();
+        const categoria = $('#categoria').val();
+        const cantidad = parseInt($('#cantidad').val()) || 0;
+        const estado = $('#estado').val();
+        const precio = parseFloat($('#precio_unitario').val()) || 0;
+        const tipoPropiedad = $('#tipo_propiedad').val();
+        
+        if (!codigo || !nombre || !categoria || cantidad < 0 || !estado || precio < 0) {
+            e.preventDefault();
+            alert('Por favor complete todos los campos obligatorios correctamente.');
+            return false;
+        }
+        
+        if (cantidad < 0) {
+            e.preventDefault();
+            alert('La cantidad no puede ser negativa.');
+            return false;
+        }
+        
+        if (precio < 0) {
+            e.preventDefault();
+            alert('El precio no puede ser negativo.');
+            return false;
+        }
+        
+        // Validación específica para productos alquilados
+        if (tipoPropiedad === 'alquilado') {
+            const codigoAlquiler = $('#codigo_alquiler').val().trim();
+            const fechaAlquiler = $('#fecha_alquiler').val();
+            const fechaVencimiento = $('#fecha_vencimiento_alquiler').val();
+            
+            if (!codigoAlquiler) {
+                e.preventDefault();
+                alert('Para productos alquilados, debe proporcionar el código de alquiler.');
+                return false;
+            }
+            
+            if (!fechaAlquiler || !fechaVencimiento) {
+                e.preventDefault();
+                alert('Para productos alquilados, debe proporcionar las fechas de inicio y vencimiento del alquiler.');
+                return false;
+            }
+            
+            if (fechaAlquiler > fechaVencimiento) {
+                e.preventDefault();
+                alert('La fecha de inicio del alquiler no puede ser posterior a la fecha de vencimiento.');
+                return false;
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

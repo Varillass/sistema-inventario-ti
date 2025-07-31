@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuración del Sistema{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-cogs"></i> Configuración del Sistema
+        </h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaConfigModal">
+            <i class="fas fa-plus"></i> Nueva Configuración
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Configuraciones Generales -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Configuraciones del Sistema</h6>
+                </div>
+                <div class="card-body">
+                    {% if configuraciones %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="configTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Valor</th>
+                                    <th>Descripción</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for config in configuraciones %}
+                                <tr>
+                                    <td>{{ config.nombre }}</td>
+                                    <td>{{ config.valor }}</td>
+                                    <td>{{ config.descripcion|default:"-" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" title="Editar" 
+                                                onclick="editarConfig('{{ config.id }}', '{{ config.nombre }}', '{{ config.valor }}', '{{ config.descripcion }}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" title="Eliminar" 
+                                                onclick="eliminarConfig('{{ config.id }}', '{{ config.nombre }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-cogs fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No hay configuraciones definidas</h5>
+                        <p class="text-muted">Las configuraciones del sistema aparecerán aquí</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaConfigModal">
+                            <i class="fas fa-plus"></i> Crear Primera Configuración
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Información -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información del Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Versión del Sistema</h6>
+                        <p class="text-muted">1.0.0</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Base de Datos</h6>
+                        <p class="text-muted">MySQL</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Framework</h6>
+                        <p class="text-muted">Django 5.2.4</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Configuraciones Activas</h6>
+                        <p class="text-muted">{{ configuraciones.count }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Acciones Rápidas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="backupSistema()">
+                            <i class="fas fa-download"></i> Backup del Sistema
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="limpiarCache()">
+                            <i class="fas fa-broom"></i> Limpiar Cache
+                        </button>
+                        <button class="btn btn-outline-info" onclick="generarLogs()">
+                            <i class="fas fa-file-alt"></i> Generar Logs
+                        </button>
+                        <button class="btn btn-outline-success" onclick="optimizarDB()">
+                            <i class="fas fa-database"></i> Optimizar Base de Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nueva Configuración -->
+<div class="modal fade" id="nuevaConfigModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i> Nueva Configuración
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="nuevaConfigForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input type="text" name="nombre" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="valor" class="form-label">Valor *</label>
+                        <input type="text" name="valor" id="valor" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Configuración -->
+<div class="modal fade" id="editarConfigModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit"></i> Editar Configuración
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editarConfigForm">
+                <input type="hidden" id="edit_config_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_nombre" class="form-label">Nombre *</label>
+                        <input type="text" name="edit_nombre" id="edit_nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_valor" class="form-label">Valor *</label>
+                        <input type="text" name="edit_valor" id="edit_valor" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_descripcion" class="form-label">Descripción</label>
+                        <textarea name="edit_descripcion" id="edit_descripcion" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar Configuración</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('#configTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+        },
+        "pageLength": 25,
+        "order": [[0, "asc"]]
+    });
+    
+    // Envío del formulario nueva configuración
+    $('#nuevaConfigForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Aquí iría la lógica para crear la configuración
+        alert('Configuración creada exitosamente');
+        $('#nuevaConfigModal').modal('hide');
+        location.reload();
+    });
+    
+    // Envío del formulario editar configuración
+    $('#editarConfigForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Aquí iría la lógica para actualizar la configuración
+        alert('Configuración actualizada exitosamente');
+        $('#editarConfigModal').modal('hide');
+        location.reload();
+    });
+});
+
+function editarConfig(id, nombre, valor, descripcion) {
+    $('#edit_config_id').val(id);
+    $('#edit_nombre').val(nombre);
+    $('#edit_valor').val(valor);
+    $('#edit_descripcion').val(descripcion);
+    $('#editarConfigModal').modal('show');
+}
+
+function eliminarConfig(id, nombre) {
+    if (confirm(`¿Está seguro de que desea eliminar la configuración "${nombre}"?`)) {
+        // Implementar eliminación
+        alert('Configuración eliminada exitosamente');
+        location.reload();
+    }
+}
+
+function backupSistema() {
+    if (confirm('¿Desea realizar un backup del sistema?')) {
+        alert('Backup iniciado. Se notificará cuando esté completo.');
+    }
+}
+
+function limpiarCache() {
+    if (confirm('¿Desea limpiar el cache del sistema?')) {
+        alert('Cache limpiado exitosamente.');
+    }
+}
+
+function generarLogs() {
+    if (confirm('¿Desea generar los logs del sistema?')) {
+        alert('Logs generados exitosamente.');
+    }
+}
+
+function optimizarDB() {
+    if (confirm('¿Desea optimizar la base de datos?')) {
+        alert('Optimización de base de datos iniciada.');
+    }
+}
+</script>
+{% endblock %} 

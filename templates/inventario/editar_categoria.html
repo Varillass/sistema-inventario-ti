@@ -1,0 +1,154 @@
+{% extends 'inventario/base.html' %}
+{% load static %}
+
+{% block title %}Editar Categoría{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-edit me-2"></i>Editar Categoría
+        </h1>
+        <a href="{% url 'inventario:lista_categorias' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Categorías
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información de la Categoría</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="categoriaForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tag me-2"></i>Nombre de la Categoría *
+                                    </label>
+                                    {{ form.nombre }}
+                                    {% if form.nombre.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.nombre.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Nombre único para identificar la categoría</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-2"></i>Descripción
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.descripcion.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Descripción opcional de la categoría</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'inventario:lista_categorias' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Actualizar Categoría
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>Información de la Categoría
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>ID:</strong> {{ categoria.id }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Productos asociados:</strong> 
+                        <span class="badge bg-info">{{ categoria.producto_set.count }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Fecha de creación:</strong><br>
+                        <small class="text-muted">{{ categoria.created_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% if categoria.updated_at %}
+                    <div class="mb-3">
+                        <strong>Última actualización:</strong><br>
+                        <small class="text-muted">{{ categoria.updated_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Consejos:</h6>
+                        <ul class="mb-0">
+                            <li>Los cambios se aplicarán a todos los productos de esta categoría</li>
+                            <li>Mantén nombres descriptivos y claros</li>
+                            <li>Considera el impacto en reportes existentes</li>
+                        </ul>
+                    </div>
+
+                    {% if categoria.producto_set.count > 0 %}
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Productos asociados:</h6>
+                        <p class="mb-0">Esta categoría tiene {{ categoria.producto_set.count }} producto(s) asociado(s). Los cambios afectarán a todos estos productos.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Validación del formulario
+        $('#categoriaForm').on('submit', function(e) {
+            const nombre = $('#id_nombre').val().trim();
+            
+            if (!nombre) {
+                e.preventDefault();
+                alert('Por favor, ingresa un nombre para la categoría.');
+                $('#id_nombre').focus();
+                return false;
+            }
+            
+            // Mostrar indicador de carga
+            $('button[type="submit"]').html('<i class="fas fa-spinner fa-spin me-2"></i>Actualizando...');
+            $('button[type="submit"]').prop('disabled', true);
+        });
+
+        // Auto-focus en el campo nombre
+        $('#id_nombre').focus();
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Productos - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-boxes me-2"></i>Productos
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'inventario:crear_producto' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nuevo Producto
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-filter me-2"></i>Filtros
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ filtros.search }}" placeholder="Código, nombre, marca...">
+            </div>
+            <div class="col-md-3">
+                <label for="categoria" class="form-label">Categoría</label>
+                <select class="form-select" id="categoria" name="categoria">
+                    <option value="">Todas las categorías</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id }}" {% if filtros.categoria == categoria.id|stringformat:"s" %}selected{% endif %}>
+                        {{ categoria.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-select" id="estado" name="estado">
+                    <option value="">Todos los estados</option>
+                    <option value="activo" {% if filtros.estado == 'activo' %}selected{% endif %}>Activo</option>
+                    <option value="inactivo" {% if filtros.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                    <option value="mantenimiento" {% if filtros.estado == 'mantenimiento' %}selected{% endif %}>En Mantenimiento</option>
+                    <option value="retirado" {% if filtros.estado == 'retirado' %}selected{% endif %}>Retirado</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="tipo_propiedad" class="form-label">Propiedad</label>
+                <select class="form-select" id="tipo_propiedad" name="tipo_propiedad">
+                    <option value="">Todos</option>
+                    <option value="propio" {% if filtros.tipo_propiedad == 'propio' %}selected{% endif %}>Propio</option>
+                    <option value="alquilado" {% if filtros.tipo_propiedad == 'alquilado' %}selected{% endif %}>Alquilado</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Filtrar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de productos -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-list me-2"></i>Lista de Productos
+            <span class="badge bg-secondary ms-2">{{ page_obj.paginator.count }} productos</span>
+        </h6>
+    </div>
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th>Ubicación</th>
+                        <th>Valor</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in page_obj %}
+                    <tr>
+                        <td>
+                            <strong>{{ producto.codigo }}</strong>
+                            {% if producto.tipo_propiedad == 'alquilado' %}
+                                <br><small class="badge bg-info">Alquilado</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div>
+                                <strong>{{ producto.nombre }}</strong>
+                                {% if producto.marca or producto.modelo %}
+                                <br>
+                                <small class="text-muted">
+                                    {% if producto.marca %}{{ producto.marca }}{% endif %}
+                                    {% if producto.marca and producto.modelo %} - {% endif %}
+                                    {% if producto.modelo %}{{ producto.modelo }}{% endif %}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ producto.categoria.nombre }}</span>
+                        </td>
+                        <td>
+                            <span class="badge {% if producto.cantidad < 5 %}bg-danger{% elif producto.cantidad < 10 %}bg-warning{% else %}bg-success{% endif %}">
+                                {{ producto.cantidad }} unidades
+                            </span>
+                        </td>
+                        <td>
+                            {% if producto.estado == 'activo' %}
+                                <span class="badge bg-success">Activo</span>
+                            {% elif producto.estado == 'inactivo' %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% elif producto.estado == 'mantenimiento' %}
+                                <span class="badge bg-warning">Mantenimiento</span>
+                            {% elif producto.estado == 'retirado' %}
+                                <span class="badge bg-danger">Retirado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if producto.ubicacion %}
+                                <small>{{ producto.ubicacion }}</small>
+                            {% else %}
+                                <small class="text-muted">Sin ubicación</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if producto.precio_unitario %}
+                                <strong>${{ producto.precio_unitario|floatformat:2 }}</strong>
+                                <br>
+                                <small class="text-muted">Total: ${{ producto.valor_total|floatformat:2 }}</small>
+                            {% else %}
+                                <small class="text-muted">Sin precio</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'inventario:detalle_producto' producto.id %}" 
+                                   class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'inventario:editar_producto' producto.id %}" 
+                                   class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'inventario:crear_movimiento' %}?producto={{ producto.id }}" 
+                                   class="btn btn-sm btn-outline-success" title="Nuevo movimiento">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </a>
+                                <a href="{% url 'inventario:eliminar_producto' producto.id %}" 
+                                   class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de que quieres eliminar el producto {{ producto.nombre }}? Esta acción no se puede deshacer.')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de productos">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if filtros.search %}&search={{ filtros.search }}{% endif %}{% if filtros.categoria %}&categoria={{ filtros.categoria }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtros.search %}&search={{ filtros.search }}{% endif %}{% if filtros.categoria %}&categoria={{ filtros.categoria }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if filtros.search %}&search={{ filtros.search }}{% endif %}{% if filtros.categoria %}&categoria={{ filtros.categoria }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtros.search %}&search={{ filtros.search }}{% endif %}{% if filtros.categoria %}&categoria={{ filtros.categoria }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if filtros.search %}&search={{ filtros.search }}{% endif %}{% if filtros.categoria %}&categoria={{ filtros.categoria }}{% endif %}{% if filtros.estado %}&estado={{ filtros.estado }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No se encontraron productos</h5>
+            <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+            <a href="{% url 'inventario:crear_producto' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Crear Primer Producto
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

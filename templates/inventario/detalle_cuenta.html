@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Cuenta - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-user-shield text-primary me-2"></i>
+                Detalle de Cuenta
+            </h1>
+            <p class="text-muted">{{ cuenta.nombre }}</p>
+        </div>
+        <div>
+            <a href="{% url 'inventario:lista_cuentas' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+            <a href="{% url 'inventario:editar_cuenta' cuenta.id %}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Editar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información principal -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Información General
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Nombre:</strong><br>
+                                <span class="h6">{{ cuenta.nombre }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Tipo de Cuenta:</strong><br>
+                                <span class="badge bg-primary">{{ cuenta.get_tipo_cuenta_display }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Email:</strong><br>
+                                <a href="mailto:{{ cuenta.email }}" class="text-decoration-none">
+                                    {{ cuenta.email }}
+                                </a>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Usuario:</strong><br>
+                                <code>{{ cuenta.usuario }}</code>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Estado:</strong><br>
+                                {% if cuenta.estado == 'activa' %}
+                                    <span class="badge bg-success">{{ cuenta.get_estado_display }}</span>
+                                {% elif cuenta.estado == 'inactiva' %}
+                                    <span class="badge bg-secondary">{{ cuenta.get_estado_display }}</span>
+                                {% elif cuenta.estado == 'suspendida' %}
+                                    <span class="badge bg-warning">{{ cuenta.get_estado_display }}</span>
+                                {% elif cuenta.estado == 'vencida' %}
+                                    <span class="badge bg-danger">{{ cuenta.get_estado_display }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if cuenta.fecha_creacion_cuenta %}
+                                <div class="mb-3">
+                                    <strong>Fecha de Creación:</strong><br>
+                                    {{ cuenta.fecha_creacion_cuenta|date:"d/m/Y" }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if cuenta.fecha_vencimiento %}
+                                <div class="mb-3">
+                                    <strong>Fecha de Vencimiento:</strong><br>
+                                    {% if cuenta.estado_vencimiento == 'vencida' %}
+                                        <span class="text-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Vencida el {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                        </span>
+                                    {% elif cuenta.estado_vencimiento == 'proximo_vencimiento' %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Vence el {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-success">
+                                            <i class="fas fa-check me-1"></i>
+                                            Vence el {{ cuenta.fecha_vencimiento|date:"d/m/Y" }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if cuenta.url_acceso %}
+                                <div class="mb-3">
+                                    <strong>URL de Acceso:</strong><br>
+                                    <a href="{{ cuenta.url_acceso }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>Acceder
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de acceso -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-key me-2"></i>Información de Acceso
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Contraseña:</strong><br>
+                                {% if cuenta.password %}
+                                    <div class="input-group">
+                                        <input type="password" id="password-field" class="form-control" value="••••••••" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                                            <i class="fas fa-eye" id="toggle-icon"></i>
+                                        </button>
+                                        <button class="btn btn-outline-info" type="button" id="copy-password" title="Copiar contraseña">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted">La contraseña está encriptada por seguridad</small>
+                                {% else %}
+                                    <span class="text-muted">No se ha configurado contraseña</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Información de Suscripción:</strong><br>
+                                {% if cuenta.plan_suscripcion %}
+                                    <strong>Plan:</strong> {{ cuenta.plan_suscripcion }}<br>
+                                {% endif %}
+                                {% if cuenta.costo_mensual %}
+                                    <strong>Costo Mensual:</strong> ${{ cuenta.costo_mensual|floatformat:2 }}<br>
+                                {% endif %}
+                                {% if cuenta.proveedor %}
+                                    <strong>Proveedor:</strong> {{ cuenta.proveedor }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asignación -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Asignación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Personal Asignado:</strong><br>
+                                {% if cuenta.personal_asignado %}
+                                    <span class="h6">{{ cuenta.personal_asignado.get_full_name }}</span>
+                                    {% if cuenta.personal_asignado.email %}
+                                        <br><small class="text-muted">{{ cuenta.personal_asignado.email }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Sin asignar</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Ubicación:</strong><br>
+                                {% if cuenta.sede %}
+                                    <strong>Sede:</strong> {{ cuenta.sede.nombre }}<br>
+                                {% endif %}
+                                {% if cuenta.area %}
+                                    <strong>Área:</strong> {{ cuenta.area.nombre }}
+                                {% endif %}
+                                {% if not cuenta.sede and not cuenta.area %}
+                                    <span class="text-muted">Sin ubicación asignada</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            {% if cuenta.observaciones %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sticky-note me-2"></i>Observaciones
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">{{ cuenta.observaciones|linebreaks }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-lg-4">
+            <!-- Información de la cuenta -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Información de la Cuenta
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>ID:</strong><br>
+                        <code>{{ cuenta.id }}</code>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Fecha de Creación:</strong><br>
+                        {{ cuenta.fecha_creacion|date:"d/m/Y H:i" }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Última Actualización:</strong><br>
+                        {{ cuenta.fecha_actualizacion|date:"d/m/Y H:i" }}
+                    </div>
+                    
+                    {% if cuenta.dias_vencimiento is not None %}
+                        <div class="mb-3">
+                            <strong>Días hasta vencimiento:</strong><br>
+                            {% if cuenta.dias_vencimiento < 0 %}
+                                <span class="text-danger">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Vencida hace {{ cuenta.dias_vencimiento|abs }} días
+                                </span>
+                            {% elif cuenta.dias_vencimiento <= 30 %}
+                                <span class="text-warning">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ cuenta.dias_vencimiento }} días
+                                </span>
+                            {% else %}
+                                <span class="text-success">
+                                    <i class="fas fa-check me-1"></i>
+                                    {{ cuenta.dias_vencimiento }} días
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones rápidas -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Acciones
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'inventario:editar_cuenta' cuenta.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Editar Cuenta
+                        </a>
+                        
+                        {% if cuenta.url_acceso %}
+                            <a href="{{ cuenta.url_acceso }}" target="_blank" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-2"></i>Acceder a la Plataforma
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'inventario:eliminar_cuenta' cuenta.id %}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Eliminar Cuenta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle password visibility
+    $('#toggle-password').click(function() {
+        var passwordField = $('#password-field');
+        var toggleIcon = $('#toggle-icon');
+        
+        if (passwordField.attr('type') === 'password') {
+            passwordField.attr('type', 'text');
+            toggleIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            passwordField.attr('type', 'password');
+            toggleIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+    
+    // Copy password to clipboard
+    $('#copy-password').click(function() {
+        // Aquí podrías implementar la funcionalidad para copiar la contraseña
+        // Por seguridad, no se muestra la contraseña real en el frontend
+        alert('Por seguridad, la contraseña no se puede copiar desde la interfaz. Contacta al administrador.');
+    });
+});
+</script>
+{% endblock %} 

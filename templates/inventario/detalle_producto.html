@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Producto{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-box"></i> Detalle de Producto
+        </h1>
+        <div>
+            <a href="{% url 'inventario:imprimir_etiqueta' producto.id %}" class="btn btn-success" target="_blank">
+                <i class="fas fa-print"></i> Imprimir Etiqueta
+            </a>
+            <a href="{% url 'inventario:editar_producto' producto.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'inventario:crear_movimiento' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Movimiento
+            </a>
+            <a href="{% url 'inventario:lista_productos' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información del Producto -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información del Producto</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Código de Barras -->
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <h6 class="font-weight-bold mb-2">Código de Barras</h6>
+                            {% if codigo_barras %}
+                                <img src="{{ codigo_barras }}" alt="Código de Barras" style="max-width: 100%; height: 120px; margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; background: white;">
+                                <div class="text-muted" style="font-size: 14px; font-weight: bold;">{{ producto.codigo }}</div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> No se pudo generar el código de barras
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="font-weight-bold">Código:</td>
+                                    <td>{{ producto.codigo }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Nombre:</td>
+                                    <td>{{ producto.nombre }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Categoría:</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ producto.categoria.nombre }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Marca:</td>
+                                    <td>{{ producto.marca|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Modelo:</td>
+                                    <td>{{ producto.modelo|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Serie:</td>
+                                    <td>{{ producto.serie|default:"-" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="font-weight-bold">Cantidad:</td>
+                                    <td>
+                                        <span class="badge {% if producto.cantidad < 5 %}bg-danger{% elif producto.cantidad < 10 %}bg-warning{% else %}bg-success{% endif %}">
+                                            {{ producto.cantidad }} unidades
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Estado:</td>
+                                    <td>
+                                        <span class="badge {% if producto.estado == 'activo' %}bg-success{% elif producto.estado == 'mantenimiento' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ producto.get_estado_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Ubicación:</td>
+                                    <td>{{ producto.ubicacion|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Precio Unitario:</td>
+                                    <td>${{ producto.precio_unitario|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Valor Total:</td>
+                                    <td class="font-weight-bold text-success">${{ producto.valor_total|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Proveedor:</td>
+                                    <td>{{ producto.proveedor|default:"-" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    {% if producto.observaciones %}
+                    <div class="mt-3">
+                        <h6 class="font-weight-bold">Observaciones:</h6>
+                        <p class="text-muted">{{ producto.observaciones }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Información de Alquiler -->
+                    {% if producto.tipo_propiedad == 'alquilado' %}
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <h6 class="font-weight-bold mb-3">
+                                <i class="fas fa-handshake me-2"></i>Información de Alquiler
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Tipo de Propiedad:</strong> 
+                                        <span class="badge bg-info">Alquilado</span>
+                                    </p>
+                                    {% if producto.codigo_alquiler %}
+                                    <p><strong>Código de Alquiler:</strong> {{ producto.codigo_alquiler }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if producto.fecha_alquiler %}
+                                    <p><strong>Fecha de Inicio:</strong> {{ producto.fecha_alquiler|date:"d/m/Y" }}</p>
+                                    {% endif %}
+                                    {% if producto.fecha_vencimiento_alquiler %}
+                                    <p><strong>Fecha de Vencimiento:</strong> 
+                                        <span class="{% if producto.fecha_vencimiento_alquiler < today %}text-danger{% else %}text-success{% endif %}">
+                                            {{ producto.fecha_vencimiento_alquiler|date:"d/m/Y" }}
+                                        </span>
+                                    </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historial de Movimientos -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history"></i> Historial de Movimientos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if movimientos %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="movimientosTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Cantidad</th>
+                                    <th>Usuario</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movimiento in movimientos %}
+                                <tr>
+                                    <td>{{ movimiento.fecha_movimiento|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <span class="badge {% if movimiento.tipo_movimiento.es_entrada %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ movimiento.tipo_movimiento.nombre }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="{% if movimiento.tipo_movimiento.es_entrada %}text-success{% else %}text-danger{% endif %}">
+                                            {% if movimiento.tipo_movimiento.es_entrada %}+{% else %}-{% endif %}{{ movimiento.cantidad }}
+                                        </span>
+                                    </td>
+                                    <td>{{ movimiento.usuario.get_full_name }}</td>
+                                    <td>{{ movimiento.motivo|truncatechars:50 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No hay movimientos registrados</h5>
+                        <p class="text-muted">Los movimientos de este producto aparecerán aquí</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Lateral -->
+        <div class="col-lg-4">
+            <!-- Estadísticas Rápidas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Estadísticas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Total Movimientos:</span>
+                            <span class="font-weight-bold">{{ movimientos.count }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Último Movimiento:</span>
+                            <span class="font-weight-bold">
+                                {% if movimientos %}
+                                    {{ movimientos.0.fecha_movimiento|date:"d/m/Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Valor por Unidad:</span>
+                            <span class="font-weight-bold">${{ producto.precio_unitario|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Valor Total:</span>
+                            <span class="font-weight-bold text-success">${{ producto.valor_total|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información Adicional</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Adquisición:</label>
+                        <p class="mb-0">{{ producto.fecha_adquisicion|date:"d/m/Y"|default:"-" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Garantía Hasta:</label>
+                        <p class="mb-0">{{ producto.garantia_hasta|date:"d/m/Y"|default:"-" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción:</label>
+                        <p class="mb-0">{{ producto.descripcion|default:"Sin descripción" }}</p>
+                    </div>
+                    
+                    <!-- Información de Alquiler en Información Adicional -->
+                    {% if producto.tipo_propiedad == 'alquilado' %}
+                    <hr class="my-3">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-plus me-1"></i>Fecha de Inicio de Alquiler:
+                        </label>
+                        <p class="mb-0">
+                            {% if producto.fecha_alquiler %}
+                                {{ producto.fecha_alquiler|date:"d/m/Y" }}
+                            {% else %}
+                                <span class="text-muted">No especificada</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-times me-1"></i>Fecha de Vencimiento de Alquiler:
+                        </label>
+                        <p class="mb-0">
+                            {% if producto.fecha_vencimiento_alquiler %}
+                                {{ producto.fecha_vencimiento_alquiler|date:"d/m/Y" }}
+                                {% if estado_alquiler %}
+                                    <span class="badge {{ estado_alquiler.clase }} ms-2">
+                                        <i class="{{ estado_alquiler.icono }} me-1"></i>{{ estado_alquiler.texto }}
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">No especificada</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Licencias Asignadas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-key"></i> Licencias Asignadas
+                    </h6>
+                    <a href="{% url 'inventario:asignar_licencia_producto' producto.id %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Asignar Licencia
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if producto.licencias.all %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Licencia</th>
+                                        <th>Tipo</th>
+                                        <th>Distribución</th>
+                                        <th>Proveedor</th>
+                                        <th>Vencimiento</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for licencia in producto.licencias.all %}
+                                        <tr>
+                                            <td>{{ licencia.nombre }}</td>
+                                            <td>
+                                                <span class="badge badge-info">{{ licencia.get_tipo_display }}</span>
+                                            </td>
+                                            <td>
+                                                {% if licencia.tipo_distribucion == 'oem' %}
+                                                    <span class="badge badge-warning">OEM</span>
+                                                {% elif licencia.tipo_distribucion == 'retail' %}
+                                                    <span class="badge badge-primary">Retail</span>
+                                                {% elif licencia.tipo_distribucion == 'volume' %}
+                                                    <span class="badge badge-secondary">Volume</span>
+                                                {% else %}
+                                                    <span class="badge badge-dark">{{ licencia.get_tipo_distribucion_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ licencia.proveedor|default:"-" }}</td>
+                                            <td>
+                                                {% if licencia.fecha_vencimiento %}
+                                                    {% if licencia.fecha_vencimiento < today %}
+                                                        <span class="text-danger">{{ licencia.fecha_vencimiento|date:"d/m/Y" }}</span>
+                                                    {% else %}
+                                                        {{ licencia.fecha_vencimiento|date:"d/m/Y" }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'inventario:detalle_licencia' licencia.id %}" class="btn btn-sm btn-primary" title="Ver licencia">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'inventario:quitar_licencia_producto' producto.id licencia.id %}" 
+                                                   class="btn btn-sm btn-danger" title="Quitar licencia"
+                                                   onclick="return confirm('¿Estás seguro de que quieres quitar esta licencia?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-key fa-3x text-gray-300 mb-3"></i>
+                            <h5 class="text-gray-500">No hay licencias asignadas</h5>
+                            <p class="text-gray-400">Este producto no tiene licencias asignadas actualmente</p>
+                            <a href="{% url 'inventario:asignar_licencia_producto' producto.id %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Asignar Primera Licencia
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Acciones Rápidas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="nuevoMovimiento()">
+                            <i class="fas fa-plus"></i> Nuevo Movimiento
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="editarProducto()">
+                            <i class="fas fa-edit"></i> Editar Producto
+                        </button>
+                        <button class="btn btn-outline-info" onclick="verReporte()">
+                            <i class="fas fa-chart-bar"></i> Ver Reporte
+                        </button>
+                        <button class="btn btn-outline-success" onclick="imprimirEtiqueta()">
+                            <i class="fas fa-print"></i> Imprimir Etiqueta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('#movimientosTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+        },
+        "pageLength": 10,
+        "order": [[0, "desc"]]
+    });
+});
+
+function nuevoMovimiento() {
+    // Redirigir a crear movimiento con el producto preseleccionado
+    window.location.href = "{% url 'inventario:crear_movimiento' %}?producto={{ producto.id }}";
+}
+
+function editarProducto() {
+    window.location.href = "{% url 'inventario:editar_producto' producto.id %}";
+}
+
+function verReporte() {
+    // Implementar vista de reporte específico del producto
+    alert('Generando reporte específico del producto...');
+}
+
+function imprimirEtiqueta() {
+    // Abrir la página de impresión de etiqueta en una nueva ventana
+    window.open("{% url 'inventario:imprimir_etiqueta' producto.id %}", '_blank');
+}
+</script>
+{% endblock %} 
