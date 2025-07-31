@@ -12,7 +12,7 @@ services:
       - key: DEBUG
         value: false
       - key: ALLOWED_HOSTS
-        value: ".onrender.com"
+        value: ".onrender.com,sistema-inventario-ti.onrender.com"
       - key: LICENSE_ENCRYPTION_KEY
         generateValue: true
       - key: ACCOUNT_ENCRYPTION_KEY

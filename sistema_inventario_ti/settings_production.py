@@ -9,7 +9,7 @@ from .settings import *
 DEBUG = False
 
 # Configuración de hosts permitidos
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.onrender.com').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.onrender.com,sistema-inventario-ti.onrender.com').split(',')
 
 # Configuración de base de datos para producción
 # Usar MySQL en lugar de PostgreSQL
