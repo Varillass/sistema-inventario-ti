@@ -12,12 +12,19 @@ DEBUG = False
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.onrender.com').split(',')
 
 # Configuración de base de datos para producción
+# Usar MySQL en lugar de PostgreSQL
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_NAME', 'inventario_ti'),
+        'USER': os.environ.get('DB_USER', 'afrodita'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'Zxasqw12@@@'),
+        'HOST': os.environ.get('DB_HOST', '181.224.226.142'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
+    }
 }
 
 # Configuración de archivos estáticos

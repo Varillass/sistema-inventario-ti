@@ -17,5 +17,15 @@ services:
         generateValue: true
       - key: ACCOUNT_ENCRYPTION_KEY
         generateValue: true
+      - key: DB_NAME
+        value: "inventario_ti"
+      - key: DB_USER
+        value: "afrodita"
+      - key: DB_PASSWORD
+        value: "Zxasqw12@@@"
+      - key: DB_HOST
+        value: "181.224.226.142"
+      - key: DB_PORT
+        value: "3306"
     healthCheckPath: /
     autoDeploy: true 
