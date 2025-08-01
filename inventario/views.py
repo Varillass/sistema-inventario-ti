@@ -2304,8 +2304,12 @@ def detalle_cuenta(request, cuenta_id):
     """Vista para mostrar detalles de una cuenta"""
     cuenta = get_object_or_404(Cuenta, id=cuenta_id)
     
+    # Calcular el valor absoluto de días de vencimiento para el template
+    dias_absolutos = abs(cuenta.dias_vencimiento) if cuenta.dias_vencimiento is not None else None
+    
     context = {
         'cuenta': cuenta,
+        'dias_absolutos': dias_absolutos,
     }
     
     return render(request, 'inventario/detalle_cuenta.html', context)
@@ -2357,6 +2361,10 @@ def gestion_cuentas(request):
         activo=True,
         fecha_vencimiento__lt=timezone.now().date()
     ).order_by('fecha_vencimiento')
+    
+    # Calcular días absolutos para cada cuenta vencida
+    for cuenta in cuentas_vencidas_lista:
+        cuenta.dias_absolutos = abs(cuenta.dias_vencimiento) if cuenta.dias_vencimiento is not None else 0
     
     # Costo total mensual
     costo_total_mensual = Cuenta.objects.filter(
