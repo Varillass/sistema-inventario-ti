@@ -78,9 +78,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'inventario_ti',
-        'USER': 'afrodita',
-        'PASSWORD': 'Zxasqw12@@@',
-        'HOST': '181.224.226.142',
+        'USER': 'root',
+        'PASSWORD': 'Gr33n2025#New',
+        'HOST': '192.10.10.250',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',

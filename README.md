@@ -180,11 +180,14 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'nombre_db',
-        'USER': 'usuario',
-        'PASSWORD': 'contraseña',
-        'HOST': 'host',
+        'NAME': 'inventario_ti',
+        'USER': 'root',
+        'PASSWORD': 'Gr33n2025#New',
+        'HOST': '192.10.10.250',
         'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
 ```

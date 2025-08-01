@@ -17,9 +17,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME', 'inventario_ti'),
-        'USER': os.environ.get('DB_USER', 'afrodita'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'Zxasqw12@@@'),
-        'HOST': os.environ.get('DB_HOST', '181.224.226.142'),
+        'USER': os.environ.get('DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'Gr33n2025#New'),
+        'HOST': os.environ.get('DB_HOST', '192.10.10.250'),
         'PORT': os.environ.get('DB_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
