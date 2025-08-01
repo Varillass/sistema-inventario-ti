@@ -1,4 +1,4 @@
-{% extends 'inventario/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Asignar Licencia - {{ producto.nombre }}{% endblock %}
@@ -41,7 +41,7 @@
                     <p><strong>Marca:</strong> {{ producto.marca|default:"No especificada" }}</p>
                     <p><strong>Modelo:</strong> {{ producto.modelo|default:"No especificado" }}</p>
                     <p><strong>Estado:</strong> 
-                        <span class="badge badge-{% if producto.estado == 'activo' %}success{% elif producto.estado == 'inactivo' %}danger{% else %}warning{% endif %}">
+                        <span class="badge {% if producto.estado == 'activo' %}bg-success{% elif producto.estado == 'inactivo' %}bg-danger{% else %}bg-warning{% endif %}">
                             {{ producto.get_estado_display }}
                         </span>
                     </p>
@@ -76,17 +76,17 @@
                                 <tr>
                                     <td>{{ licencia.nombre }}</td>
                                     <td>
-                                        <span class="badge badge-info">{{ licencia.get_tipo_display }}</span>
+                                        <span class="badge bg-info">{{ licencia.get_tipo_display }}</span>
                                     </td>
                                     <td>
                                         {% if licencia.tipo_distribucion == 'oem' %}
-                                            <span class="badge badge-warning">OEM</span>
+                                            <span class="badge bg-warning">OEM</span>
                                         {% elif licencia.tipo_distribucion == 'retail' %}
-                                            <span class="badge badge-primary">Retail</span>
+                                            <span class="badge bg-primary">Retail</span>
                                         {% elif licencia.tipo_distribucion == 'volume' %}
-                                            <span class="badge badge-secondary">Volume</span>
+                                            <span class="badge bg-secondary">Volume</span>
                                         {% else %}
-                                            <span class="badge badge-dark">{{ licencia.get_tipo_distribucion_display }}</span>
+                                            <span class="badge bg-dark">{{ licencia.get_tipo_distribucion_display }}</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ licencia.proveedor|default:"-" }}</td>
