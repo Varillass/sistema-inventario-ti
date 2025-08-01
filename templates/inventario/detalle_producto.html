@@ -354,17 +354,17 @@
                                         <tr>
                                             <td>{{ licencia.nombre }}</td>
                                             <td>
-                                                <span class="badge badge-info">{{ licencia.get_tipo_display }}</span>
+                                                <span class="badge bg-info">{{ licencia.get_tipo_display }}</span>
                                             </td>
                                             <td>
                                                 {% if licencia.tipo_distribucion == 'oem' %}
-                                                    <span class="badge badge-warning">OEM</span>
+                                                    <span class="badge bg-warning">OEM</span>
                                                 {% elif licencia.tipo_distribucion == 'retail' %}
-                                                    <span class="badge badge-primary">Retail</span>
+                                                    <span class="badge bg-primary">Retail</span>
                                                 {% elif licencia.tipo_distribucion == 'volume' %}
-                                                    <span class="badge badge-secondary">Volume</span>
+                                                    <span class="badge bg-secondary">Volume</span>
                                                 {% else %}
-                                                    <span class="badge badge-dark">{{ licencia.get_tipo_distribucion_display }}</span>
+                                                    <span class="badge bg-dark">{{ licencia.get_tipo_distribucion_display }}</span>
                                                 {% endif %}
                                             </td>
                                             <td>{{ licencia.proveedor|default:"-" }}</td>
