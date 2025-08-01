@@ -112,6 +112,25 @@
                                     <td class="font-weight-bold">Proveedor:</td>
                                     <td>{{ producto.proveedor|default:"-" }}</td>
                                 </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Personal Asignado:</td>
+                                    <td>
+                                        {% if producto.personal_asignado %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ producto.personal_asignado.apellido }}, {{ producto.personal_asignado.nombre }}
+                                            </span>
+                                            {% if producto.personal_asignado.cargo %}
+                                                <br><small class="text-muted">{{ producto.personal_asignado.cargo }}</small>
+                                            {% endif %}
+                                            {% if producto.personal_asignado.area %}
+                                                <br><small class="text-muted">{{ producto.personal_asignado.area.nombre }} - {{ producto.personal_asignado.area.sede.nombre }}</small>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">No asignado</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             </table>
                         </div>
                     </div>
