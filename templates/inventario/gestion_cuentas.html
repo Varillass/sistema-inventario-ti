@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 {% load static %}
 
 {% block title %}Gestión Avanzada de Cuentas - Sistema de Inventario TI{% endblock %}
@@ -241,7 +242,7 @@
                                             </td>
                                             <td>{{ cuenta.fecha_vencimiento|date:"d/m/Y" }}</td>
                                             <td>
-                                                <span class="badge bg-danger">{{ cuenta.dias_vencimiento|abs }}</span>
+                                                <span class="badge bg-danger">{{ cuenta.dias_vencimiento|abs_value }}</span>
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
