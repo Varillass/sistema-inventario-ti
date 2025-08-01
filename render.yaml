@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: sistema-inventario-ti
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn sistema_inventario_ti.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: LICENSE_ENCRYPTION_KEY
+        value: b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
+      - key: ACCOUNT_ENCRYPTION_KEY
+        value: b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
+      - key: WINBOX_ENCRYPTION_KEY
+        value: b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=' 
