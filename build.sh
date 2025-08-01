@@ -21,7 +21,7 @@ pip install -r requirements.txt || {
 }
 
 # Recolectar archivos estáticos
-python manage.py collectstatic --no-input
+python manage.py collectstatic --no-input --settings=sistema_inventario_ti.settings_production
 
-# Ejecutar migraciones
-python manage.py migrate 
+# Ejecutar migraciones con configuración de producción
+python manage.py migrate --settings=sistema_inventario_ti.settings_production 

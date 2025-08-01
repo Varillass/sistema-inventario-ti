@@ -60,8 +60,9 @@ LOGGING = {
 }
 
 # Configuración de encriptación desde variables de entorno
-LICENSE_ENCRYPTION_KEY = os.environ.get('LICENSE_ENCRYPTION_KEY', '').encode()
-ACCOUNT_ENCRYPTION_KEY = os.environ.get('ACCOUNT_ENCRYPTION_KEY', '').encode()
+LICENSE_ENCRYPTION_KEY = os.environ.get('LICENSE_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=').encode() if isinstance(os.environ.get('LICENSE_ENCRYPTION_KEY'), str) else os.environ.get('LICENSE_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=')
+ACCOUNT_ENCRYPTION_KEY = os.environ.get('ACCOUNT_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=').encode() if isinstance(os.environ.get('ACCOUNT_ENCRYPTION_KEY'), str) else os.environ.get('ACCOUNT_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=')
+WINBOX_ENCRYPTION_KEY = os.environ.get('WINBOX_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=').encode() if isinstance(os.environ.get('WINBOX_ENCRYPTION_KEY'), str) else os.environ.get('WINBOX_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=')
 
 # Configuración de middleware para producción
 MIDDLEWARE = [

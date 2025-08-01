@@ -3,14 +3,26 @@ services:
     name: sistema-inventario-ti
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn sistema_inventario_ti.wsgi:application
+    startCommand: gunicorn sistema_inventario_ti.wsgi:application --env DJANGO_SETTINGS_MODULE=sistema_inventario_ti.settings_production
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.7
+      - key: DJANGO_SETTINGS_MODULE
+        value: sistema_inventario_ti.settings_production
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: false
+      - key: DB_NAME
+        value: inventario_ti
+      - key: DB_USER
+        value: afrodita
+      - key: DB_PASSWORD
+        value: Zxasqw12@@@
+      - key: DB_HOST
+        value: 181.224.226.142
+      - key: DB_PORT
+        value: 3306
       - key: LICENSE_ENCRYPTION_KEY
         value: b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
       - key: ACCOUNT_ENCRYPTION_KEY
