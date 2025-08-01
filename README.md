@@ -1,225 +1,95 @@
 # Sistema de Inventario TI
 
-Un sistema completo de gestión de inventario para empresas de tecnología, desarrollado con Django.
+Sistema completo de gestión de inventario para el área de TI, desarrollado con Django y MySQL.
 
-## 🚀 Características
+## Características
 
-### Gestión de Inventario
-- **Productos**: Registro completo de equipos con códigos únicos
-- **Categorías**: Organización por tipos de productos
-- **Movimientos**: Control de entradas y salidas de inventario
-- **Ubicaciones**: Gestión por sedes y áreas
+- ✅ Sistema de autenticación con roles (admin/user)
+- ✅ Gestión de productos y categorías
+- ✅ Movimientos de inventario con trazabilidad
+- ✅ Gestión de sedes, áreas y personal
+- ✅ Sistema de licencias y cuentas
+- ✅ Conexiones Winbox para MikroTik
+- ✅ Planificación semanal
+- ✅ Generación de reportes (Excel/PDF)
+- ✅ Encriptación de datos sensibles
 
-### Gestión de Licencias
-- **Licencias de Software**: Control de licencias con encriptación de claves
-- **Tipos de Distribución**: OEM, Retail, Volume License
-- **Asignación**: Vinculación de licencias a productos
-- **Vencimientos**: Control de fechas de expiración
+## Despliegue en Render
 
-### Gestión de Cuentas
-- **Cuentas de Servicios**: Office 365, Google Workspace, AWS, etc.
-- **Contraseñas Encriptadas**: Seguridad en el almacenamiento
-- **Suscripciones**: Control de planes y costos mensuales
+### 1. Preparación del Repositorio
 
-### Reportes
-- **Reportes PDF**: Generación automática de reportes en PDF
-- **Filtros Avanzados**: Múltiples criterios de búsqueda
-- **Estadísticas**: Dashboard con métricas importantes
+Asegúrate de que tu repositorio contenga los siguientes archivos:
+- `requirements.txt`
+- `build.sh`
+- `runtime.txt`
+- `manage.py`
+- `sistema_inventario_ti/settings.py`
 
-### Seguridad
-- **Encriptación**: Claves de licencia y contraseñas encriptadas
-- **Roles de Usuario**: Administrador y Usuario
-- **Autenticación**: Sistema de login seguro
+### 2. Configuración en Render
 
-## 🛠️ Tecnologías
+1. **Crear una nueva aplicación web** en Render
+2. **Conectar tu repositorio** de GitHub/GitLab
+3. **Configurar las variables de entorno**:
 
-- **Backend**: Django 5.2.4
-- **Base de Datos**: MySQL
-- **Frontend**: Bootstrap 5, jQuery
-- **Encriptación**: Cryptography (Fernet)
-- **Reportes**: ReportLab
-- **Despliegue**: Render
-
-## 📋 Requisitos
-
-- Python 3.8+
-- MySQL 5.7+
-- pip
-
-## 🔧 Instalación
-
-### 1. Clonar el repositorio
-```bash
-git clone https://github.com/tu-usuario/sistema-inventario-ti.git
-cd sistema-inventario-ti
+```
+SECRET_KEY=tu_clave_secreta_generada
+DEBUG=False
+DATABASE_URL=postgresql://usuario:password@host:puerto/nombre_db
+LICENSE_ENCRYPTION_KEY=b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
+ACCOUNT_ENCRYPTION_KEY=b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
+WINBOX_ENCRYPTION_KEY=b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
 ```
 
-### 2. Crear entorno virtual
-```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
-```
+### 3. Configuración de la Aplicación
 
-### 3. Instalar dependencias
-```bash
-pip install -r requirements.txt
-```
+- **Build Command**: `./build.sh`
+- **Start Command**: `gunicorn sistema_inventario_ti.wsgi:application`
 
-### 4. Configurar base de datos
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
+### 4. Base de Datos
 
-### 5. Crear superusuario
+Render proporcionará automáticamente una base de datos PostgreSQL. El archivo `build.sh` ejecutará las migraciones automáticamente.
+
+### 5. Usuario Inicial
+
+Después del primer despliegue, necesitarás crear un usuario administrador. Puedes hacerlo ejecutando:
+
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6. Ejecutar servidor
+O crear un script de inicialización en `build.sh`:
+
 ```bash
-python manage.py runserver
+echo "from inventario.models import Usuario; Usuario.objects.create_superuser('admin', 'admin@example.com', 'password123') if not Usuario.objects.filter(username='admin').exists() else None" | python manage.py shell
 ```
 
-## 🔐 Configuración de Encriptación
+## Desarrollo Local
 
-El sistema utiliza encriptación para las claves de licencia y contraseñas. Las claves se configuran en `settings.py`:
+1. **Clonar el repositorio**
+2. **Instalar dependencias**: `pip install -r requirements.txt`
+3. **Configurar base de datos MySQL**
+4. **Ejecutar migraciones**: `python manage.py migrate`
+5. **Crear superusuario**: `python manage.py createsuperuser`
+6. **Ejecutar servidor**: `python manage.py runserver`
 
-```python
-LICENSE_ENCRYPTION_KEY = b'tu-clave-aqui'
-ACCOUNT_ENCRYPTION_KEY = b'tu-clave-aqui'
-```
-
-## 📊 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 sistema_inventario_ti/
-├── inventario/                 # App principal
-│   ├── models.py              # Modelos de datos
-│   ├── views.py               # Vistas y lógica
-│   ├── forms.py               # Formularios
-│   └── urls.py                # URLs de la app
-├── templates/                 # Plantillas HTML
-│   ├── base.html             # Template base
-│   └── inventario/           # Templates específicos
-├── static/                   # Archivos estáticos
-├── media/                    # Archivos subidos
-└── manage.py                 # Script de Django
+├── inventario/           # Aplicación principal
+├── templates/           # Plantillas HTML
+├── static/             # Archivos estáticos
+├── sistema_inventario_ti/  # Configuración del proyecto
+├── requirements.txt     # Dependencias
+├── build.sh           # Script de construcción para Render
+├── runtime.txt        # Versión de Python
+└── manage.py         # Script de gestión de Django
 ```
 
-## 🚀 Despliegue en Render
+## Tecnologías Utilizadas
 
-### 1. Preparar para producción
-
-Crear archivo `render.yaml`:
-```yaml
-services:
-  - type: web
-    name: sistema-inventario-ti
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn sistema_inventario_ti.wsgi:application
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.9.16
-```
-
-### 2. Configurar variables de entorno en Render
-- `SECRET_KEY`
-- `DATABASE_URL`
-- `LICENSE_ENCRYPTION_KEY`
-- `ACCOUNT_ENCRYPTION_KEY`
-
-### 3. Conectar con GitHub
-- Conectar el repositorio de GitHub
-- Configurar build automático
-
-## 📝 Uso
-
-### Gestión de Productos
-1. Ir a **Productos** → **Lista de Productos**
-2. Crear categorías y sedes primero
-3. Agregar productos con códigos únicos
-4. Asignar ubicaciones y personal
-
-### Gestión de Licencias
-1. Ir a **Licencias** → **Lista de Licencias**
-2. Crear licencias con claves encriptadas
-3. Asignar licencias a productos
-4. Controlar vencimientos
-
-### Gestión de Cuentas
-1. Ir a **Cuentas** → **Lista de Cuentas**
-2. Registrar cuentas de servicios
-3. Configurar contraseñas encriptadas
-4. Monitorear vencimientos
-
-### Reportes
-1. Ir a **Reportes**
-2. Seleccionar tipo de reporte
-3. Aplicar filtros
-4. Generar y descargar PDF
-
-## 🔧 Configuración de Base de Datos
-
-### Desarrollo (SQLite)
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-```
-
-### Producción (MySQL)
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'inventario_ti',
-        'USER': 'root',
-        'PASSWORD': 'Gr33n2025#New',
-        'HOST': '192.10.10.250',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
-    }
-}
-```
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-
-## 📞 Soporte
-
-Para soporte técnico, contactar a:
-- Email: soporte@empresa.com
-- Teléfono: +1 234 567 890
-
-## 🗺️ Roadmap
-
-- [ ] API REST completa
-- [ ] Aplicación móvil
-- [ ] Integración con proveedores
-- [ ] Dashboard avanzado
-- [ ] Notificaciones automáticas
-- [ ] Backup automático
-- [ ] Auditoría de cambios
-
----
-
-**Desarrollado con ❤️ para la gestión eficiente de inventarios TI** 
+- **Backend**: Django 5.2.4
+- **Base de Datos**: MySQL (desarrollo) / PostgreSQL (producción)
+- **Frontend**: Bootstrap 5, jQuery, DataTables
+- **Encriptación**: cryptography (Fernet)
+- **Despliegue**: Render, Gunicorn, WhiteNoise 

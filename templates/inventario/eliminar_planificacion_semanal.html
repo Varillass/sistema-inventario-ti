@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Tarea - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-trash me-2"></i>Eliminar Tarea
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'inventario:lista_planificacion_semanal' %}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>¡Atención!</strong> Estás a punto de eliminar la siguiente tarea:
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ tarea.titulo }}</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Día:</strong> {{ tarea.get_dia_semana_display }}</p>
+                                <p><strong>Hora:</strong> {{ tarea.hora_inicio|time:"H:i" }}
+                                    {% if tarea.hora_fin %} - {{ tarea.hora_fin|time:"H:i" }}{% endif %}</p>
+                                <p><strong>Prioridad:</strong> 
+                                    <span class="badge {% if tarea.prioridad == 'alta' %}bg-danger{% elif tarea.prioridad == 'media' %}bg-warning{% else %}bg-info{% endif %}">
+                                        {{ tarea.get_prioridad_display }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Estado:</strong> 
+                                    <span class="badge {% if tarea.estado == 'completada' %}bg-success{% elif tarea.estado == 'en_proceso' %}bg-warning{% elif tarea.estado == 'cancelada' %}bg-secondary{% else %}bg-primary{% endif %}">
+                                        {{ tarea.get_estado_display }}
+                                    </span>
+                                </p>
+                                {% if tarea.personal_asignado %}
+                                <p><strong>Personal:</strong> {{ tarea.personal_asignado }}</p>
+                                {% endif %}
+                                {% if tarea.sede %}
+                                <p><strong>Sede:</strong> {{ tarea.sede.nombre }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if tarea.descripcion %}
+                        <div class="mt-3">
+                            <strong>Descripción:</strong>
+                            <p class="text-muted">{{ tarea.descripcion }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'inventario:lista_planificacion_semanal' %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Eliminar Tarea
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

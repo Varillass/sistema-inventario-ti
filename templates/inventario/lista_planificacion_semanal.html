@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Planificación Semanal - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-calendar-week me-2"></i>Planificación Semanal
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'inventario:crear_planificacion_semanal' %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus me-1"></i>Nueva Tarea
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-filter me-2"></i>Filtros
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="dia" class="form-label">Día de la semana</label>
+                <select name="dia" id="dia" class="form-control">
+                    <option value="">Todos los días</option>
+                    {% for value, label in dias_semana %}
+                        <option value="{{ value }}" {% if filtros.dia == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-control">
+                    <option value="">Todos los estados</option>
+                    {% for value, label in estados %}
+                        <option value="{{ value }}" {% if filtros.estado == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="prioridad" class="form-label">Prioridad</label>
+                <select name="prioridad" id="prioridad" class="form-control">
+                    <option value="">Todas las prioridades</option>
+                    {% for value, label in prioridades %}
+                        <option value="{{ value }}" {% if filtros.prioridad == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="personal" class="form-label">Personal</label>
+                <select name="personal" id="personal" class="form-control">
+                    <option value="">Todo el personal</option>
+                    {% for personal in personal_list %}
+                        <option value="{{ personal.id }}" {% if filtros.personal == personal.id|stringformat:"s" %}selected{% endif %}>{{ personal }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i>Filtrar
+                </button>
+                <a href="{% url 'inventario:lista_planificacion_semanal' %}" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i>Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Planificación por días -->
+{% if tareas_por_dia %}
+    {% for dia, tareas in tareas_por_dia.items %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-calendar-day me-2"></i>{{ dia }}
+            </h6>
+            <span class="badge bg-primary">{{ tareas|length }} tarea{{ tareas|length|pluralize:"s" }}</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Tarea</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th>Personal</th>
+                            <th>Duración</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tarea in tareas %}
+                        <tr>
+                            <td>
+                                <strong>{{ tarea.hora_inicio|time:"H:i" }}</strong>
+                                {% if tarea.hora_fin %}
+                                    - {{ tarea.hora_fin|time:"H:i" }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ tarea.titulo }}</strong>
+                                    {% if tarea.descripcion %}
+                                        <br><small class="text-muted">{{ tarea.descripcion|truncatechars:100 }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if tarea.prioridad == 'alta' %}bg-danger{% elif tarea.prioridad == 'media' %}bg-warning{% else %}bg-info{% endif %}">
+                                    {{ tarea.get_prioridad_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if tarea.estado == 'completada' %}bg-success{% elif tarea.estado == 'en_proceso' %}bg-warning{% elif tarea.estado == 'cancelada' %}bg-secondary{% else %}bg-primary{% endif %}">
+                                    {{ tarea.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if tarea.personal_asignado %}
+                                    <span class="badge bg-info">{{ tarea.personal_asignado }}</span>
+                                {% else %}
+                                    <span class="text-muted">Sin asignar</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if tarea.duracion_horas %}
+                                    <span class="badge bg-secondary">{{ tarea.duracion_horas }}h</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'inventario:editar_planificacion_semanal' tarea.id %}" 
+                                       class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <!-- Cambiar estado -->
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                data-bs-toggle="dropdown" title="Cambiar estado">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            {% for estado_value, estado_label in estados %}
+                                                {% if estado_value != tarea.estado %}
+                                                <li>
+                                                    <form method="post" action="{% url 'inventario:cambiar_estado_tarea' tarea.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="estado" value="{{ estado_value }}">
+                                                        <button type="submit" class="dropdown-item">
+                                                            {{ estado_label }}
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    
+                                    <a href="{% url 'inventario:eliminar_planificacion_semanal' tarea.id %}" 
+                                       class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No hay tareas programadas</h5>
+        <p class="text-muted">Crea tu primera tarea para comenzar a organizar tu semana</p>
+        <a href="{% url 'inventario:crear_planificacion_semanal' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Crear Tarea
+        </a>
+    </div>
+{% endif %}
+{% endblock %} 

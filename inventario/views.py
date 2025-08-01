@@ -29,10 +29,12 @@ import tempfile
 
 from .models import (
     Usuario, Categoria, Sede, Area, Personal, Producto, 
-    Movimiento, TipoMovimiento, Licencia, ProductoLicencia, Reporte, ConfiguracionSistema, Cuenta
+    Movimiento, TipoMovimiento, Licencia, ProductoLicencia, Reporte, ConfiguracionSistema, Cuenta,
+    PlanificacionSemanal, ConexionWinbox
 )
 from .forms import (
-    CategoriaForm, SedeForm, AreaForm, PersonalForm, LicenciaForm, AsignarLicenciaForm, CuentaForm
+    CategoriaForm, SedeForm, AreaForm, PersonalForm, LicenciaForm, AsignarLicenciaForm, CuentaForm,
+    PlanificacionSemanalForm, ConexionWinboxForm
 )
 
 
@@ -2436,5 +2438,262 @@ def api_get_account_password(request, cuenta_id):
             'success': False,
             'error': str(e)
         })
+
+
+# ============================================================================
+# VISTAS PARA PLANIFICACIÓN SEMANAL
+# ============================================================================
+
+@login_required
+def lista_planificacion_semanal(request):
+    """Lista de planificación semanal"""
+    tareas = PlanificacionSemanal.objects.filter(activo=True).select_related(
+        'personal_asignado', 'sede', 'area'
+    ).order_by('dia_semana', 'hora_inicio')
+    
+    # Filtros
+    dia = request.GET.get('dia')
+    estado = request.GET.get('estado')
+    prioridad = request.GET.get('prioridad')
+    personal_id = request.GET.get('personal')
+    
+    if dia:
+        tareas = tareas.filter(dia_semana=dia)
+    if estado:
+        tareas = tareas.filter(estado=estado)
+    if prioridad:
+        tareas = tareas.filter(prioridad=prioridad)
+    if personal_id:
+        tareas = tareas.filter(personal_asignado_id=personal_id)
+    
+    # Agrupar por día
+    tareas_por_dia = {}
+    for tarea in tareas:
+        dia = tarea.get_dia_semana_display()
+        if dia not in tareas_por_dia:
+            tareas_por_dia[dia] = []
+        tareas_por_dia[dia].append(tarea)
+    
+    context = {
+        'tareas_por_dia': tareas_por_dia,
+        'dias_semana': PlanificacionSemanal.DIAS_SEMANA,
+        'estados': PlanificacionSemanal.ESTADOS,
+        'prioridades': PlanificacionSemanal.PRIORIDADES,
+        'personal_list': Personal.objects.filter(activo=True),
+        'filtros': {
+            'dia': dia,
+            'estado': estado,
+            'prioridad': prioridad,
+            'personal': personal_id,
+        }
+    }
+    
+    return render(request, 'inventario/lista_planificacion_semanal.html', context)
+
+
+@login_required
+def crear_planificacion_semanal(request):
+    """Crear nueva tarea de planificación semanal"""
+    if request.method == 'POST':
+        form = PlanificacionSemanalForm(request.POST)
+        if form.is_valid():
+            tarea = form.save()
+            messages.success(request, f'Tarea "{tarea.titulo}" creada exitosamente.')
+            return redirect('inventario:lista_planificacion_semanal')
+    else:
+        form = PlanificacionSemanalForm()
+    
+    context = {
+        'form': form,
+        'titulo': 'Nueva Tarea Semanal'
+    }
+    
+    return render(request, 'inventario/crear_planificacion_semanal.html', context)
+
+
+@login_required
+def editar_planificacion_semanal(request, tarea_id):
+    """Editar tarea de planificación semanal"""
+    tarea = get_object_or_404(PlanificacionSemanal, id=tarea_id)
+    
+    if request.method == 'POST':
+        form = PlanificacionSemanalForm(request.POST, instance=tarea)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Tarea "{tarea.titulo}" actualizada exitosamente.')
+            return redirect('inventario:lista_planificacion_semanal')
+    else:
+        form = PlanificacionSemanalForm(instance=tarea)
+    
+    context = {
+        'form': form,
+        'tarea': tarea,
+        'titulo': f'Editar Tarea: {tarea.titulo}'
+    }
+    
+    return render(request, 'inventario/editar_planificacion_semanal.html', context)
+
+
+@login_required
+def eliminar_planificacion_semanal(request, tarea_id):
+    """Eliminar tarea de planificación semanal"""
+    tarea = get_object_or_404(PlanificacionSemanal, id=tarea_id)
+    
+    if request.method == 'POST':
+        tarea.activo = False
+        tarea.save()
+        messages.success(request, f'Tarea "{tarea.titulo}" eliminada exitosamente.')
+        return redirect('inventario:lista_planificacion_semanal')
+    
+    context = {
+        'tarea': tarea
+    }
+    
+    return render(request, 'inventario/eliminar_planificacion_semanal.html', context)
+
+
+@login_required
+def cambiar_estado_tarea(request, tarea_id):
+    """Cambiar estado de una tarea"""
+    tarea = get_object_or_404(PlanificacionSemanal, id=tarea_id)
+    nuevo_estado = request.POST.get('estado')
+    
+    if nuevo_estado in dict(PlanificacionSemanal.ESTADOS):
+        tarea.estado = nuevo_estado
+        if nuevo_estado == 'completada':
+            tarea.fecha_completada = timezone.now()
+        tarea.save()
+        messages.success(request, f'Estado de la tarea "{tarea.titulo}" cambiado a {tarea.get_estado_display()}.')
+    
+    return redirect('inventario:lista_planificacion_semanal')
+
+
+# ============================================================================
+# VISTAS PARA CONEXIONES WINBOX
+# ============================================================================
+
+@login_required
+def lista_conexiones_winbox(request):
+    """Lista de conexiones Winbox"""
+    conexiones = ConexionWinbox.objects.filter(activo=True).select_related(
+        'sede', 'area', 'ultimo_usuario_conectado'
+    ).order_by('sede', 'area', 'nombre')
+    
+    # Filtros
+    tipo_equipo = request.GET.get('tipo_equipo')
+    estado = request.GET.get('estado')
+    sede_id = request.GET.get('sede')
+    
+    if tipo_equipo:
+        conexiones = conexiones.filter(tipo_equipo=tipo_equipo)
+    if estado:
+        conexiones = conexiones.filter(estado=estado)
+    if sede_id:
+        conexiones = conexiones.filter(sede_id=sede_id)
+    
+    context = {
+        'conexiones': conexiones,
+        'tipos_equipo': ConexionWinbox.TIPOS_EQUIPO,
+        'estados_conexion': ConexionWinbox.ESTADOS_CONEXION,
+        'sedes': Sede.objects.filter(activo=True),
+        'filtros': {
+            'tipo_equipo': tipo_equipo,
+            'estado': estado,
+            'sede': sede_id,
+        }
+    }
+    
+    return render(request, 'inventario/lista_conexiones_winbox.html', context)
+
+
+@login_required
+def crear_conexion_winbox(request):
+    """Crear nueva conexión Winbox"""
+    if request.method == 'POST':
+        form = ConexionWinboxForm(request.POST)
+        if form.is_valid():
+            conexion = form.save()
+            messages.success(request, f'Conexión "{conexion.nombre}" creada exitosamente.')
+            return redirect('inventario:lista_conexiones_winbox')
+    else:
+        form = ConexionWinboxForm()
+    
+    context = {
+        'form': form,
+        'titulo': 'Nueva Conexión Winbox'
+    }
+    
+    return render(request, 'inventario/crear_conexion_winbox.html', context)
+
+
+@login_required
+def editar_conexion_winbox(request, conexion_id):
+    """Editar conexión Winbox"""
+    conexion = get_object_or_404(ConexionWinbox, id=conexion_id)
+    
+    if request.method == 'POST':
+        form = ConexionWinboxForm(request.POST, instance=conexion)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Conexión "{conexion.nombre}" actualizada exitosamente.')
+            return redirect('inventario:lista_conexiones_winbox')
+    else:
+        form = ConexionWinboxForm(instance=conexion)
+    
+    context = {
+        'form': form,
+        'conexion': conexion,
+        'titulo': f'Editar Conexión: {conexion.nombre}'
+    }
+    
+    return render(request, 'inventario/editar_conexion_winbox.html', context)
+
+
+@login_required
+def eliminar_conexion_winbox(request, conexion_id):
+    """Eliminar conexión Winbox"""
+    conexion = get_object_or_404(ConexionWinbox, id=conexion_id)
+    
+    if request.method == 'POST':
+        conexion.activo = False
+        conexion.save()
+        messages.success(request, f'Conexión "{conexion.nombre}" eliminada exitosamente.')
+        return redirect('inventario:lista_conexiones_winbox')
+    
+    context = {
+        'conexion': conexion
+    }
+    
+    return render(request, 'inventario/eliminar_conexion_winbox.html', context)
+
+
+@login_required
+def conectar_winbox(request, conexion_id):
+    """Registrar conexión a Winbox"""
+    conexion = get_object_or_404(ConexionWinbox, id=conexion_id)
+    
+    # Actualizar información de conexión
+    conexion.ultima_conexion = timezone.now()
+    conexion.ultimo_usuario_conectado = request.user
+    conexion.save()
+    
+    messages.success(request, f'Conexión registrada a "{conexion.nombre}".')
+    return redirect('inventario:lista_conexiones_winbox')
+
+
+@login_required
+@csrf_exempt
+def api_get_winbox_password(request, conexion_id):
+    """API para obtener contraseña de conexión Winbox"""
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'No tienes permisos para acceder a esta información'}, status=403)
+    
+    conexion = get_object_or_404(ConexionWinbox, id=conexion_id)
+    password = conexion.get_password()
+    
+    return JsonResponse({
+        'password': password,
+        'conexion': conexion.nombre
+    })
 
 

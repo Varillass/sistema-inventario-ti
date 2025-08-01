@@ -1,5 +1,5 @@
 from django import forms
-from .models import Categoria, Sede, Area, Personal, Licencia, Producto, Cuenta
+from .models import Categoria, Sede, Area, Personal, Licencia, Producto, Cuenta, PlanificacionSemanal, ConexionWinbox
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
@@ -305,3 +305,89 @@ class CuentaForm(forms.ModelForm):
         if commit:
             cuenta.save()
         return cuenta 
+
+
+class PlanificacionSemanalForm(forms.ModelForm):
+    """Formulario para planificación semanal"""
+    class Meta:
+        model = PlanificacionSemanal
+        fields = [
+            'titulo', 'descripcion', 'dia_semana', 'hora_inicio', 'hora_fin',
+            'prioridad', 'estado', 'personal_asignado', 'sede', 'area', 'observaciones'
+        ]
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'dia_semana': forms.Select(attrs={'class': 'form-control'}),
+            'hora_inicio': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'hora_fin': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'prioridad': forms.Select(attrs={'class': 'form-control'}),
+            'estado': forms.Select(attrs={'class': 'form-control'}),
+            'personal_asignado': forms.Select(attrs={'class': 'form-control'}),
+            'sede': forms.Select(attrs={'class': 'form-control'}),
+            'area': forms.Select(attrs={'class': 'form-control'}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer campos de sede y área opcionales
+        self.fields['sede'].required = False
+        self.fields['area'].required = False
+        self.fields['personal_asignado'].required = False
+        self.fields['hora_fin'].required = False
+
+
+class ConexionWinboxForm(forms.ModelForm):
+    """Formulario para conexiones Winbox"""
+    password_plain = forms.CharField(
+        label='Contraseña',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        required=False,
+        help_text='Deja en blanco para mantener la contraseña actual'
+    )
+    
+    class Meta:
+        model = ConexionWinbox
+        fields = [
+            'nombre', 'tipo_equipo', 'ip_address', 'puerto', 'usuario',
+            'sede', 'area', 'ubicacion_fisica', 'modelo', 'serie',
+            'version_routeros', 'estado', 'observaciones'
+        ]
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipo_equipo': forms.Select(attrs={'class': 'form-control'}),
+            'ip_address': forms.TextInput(attrs={'class': 'form-control'}),
+            'puerto': forms.NumberInput(attrs={'class': 'form-control'}),
+            'usuario': forms.TextInput(attrs={'class': 'form-control'}),
+            'sede': forms.Select(attrs={'class': 'form-control'}),
+            'area': forms.Select(attrs={'class': 'form-control'}),
+            'ubicacion_fisica': forms.TextInput(attrs={'class': 'form-control'}),
+            'modelo': forms.TextInput(attrs={'class': 'form-control'}),
+            'serie': forms.TextInput(attrs={'class': 'form-control'}),
+            'version_routeros': forms.TextInput(attrs={'class': 'form-control'}),
+            'estado': forms.Select(attrs={'class': 'form-control'}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer campos opcionales
+        self.fields['sede'].required = False
+        self.fields['area'].required = False
+        self.fields['ubicacion_fisica'].required = False
+        self.fields['modelo'].required = False
+        self.fields['serie'].required = False
+        self.fields['version_routeros'].required = False
+        self.fields['observaciones'].required = False
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        # Manejar la contraseña
+        if self.cleaned_data.get('password_plain'):
+            instance.set_password(self.cleaned_data['password_plain'])
+        
+        if commit:
+            instance.save()
+        return instance 

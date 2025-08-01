@@ -1,0 +1,277 @@
+{% extends 'crear_conexion_winbox.html' %}
+
+{% block title %}{{ titulo }} - Sistema de Inventario TI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-edit me-2"></i>{{ titulo }}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'inventario:lista_conexiones_winbox' %}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-edit me-2"></i>Editar Conexión
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+                                {{ form.nombre.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.nombre.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.tipo_equipo.id_for_label }}" class="form-label">
+                                {{ form.tipo_equipo.label }}
+                            </label>
+                            {{ form.tipo_equipo }}
+                            {% if form.tipo_equipo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.tipo_equipo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.ip_address.id_for_label }}" class="form-label">
+                                {{ form.ip_address.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.ip_address }}
+                            {% if form.ip_address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.ip_address.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.puerto.id_for_label }}" class="form-label">
+                                {{ form.puerto.label }}
+                            </label>
+                            {{ form.puerto }}
+                            {% if form.puerto.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.puerto.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="{{ form.estado.id_for_label }}" class="form-label">
+                                {{ form.estado.label }}
+                            </label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.estado.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.usuario.id_for_label }}" class="form-label">
+                                {{ form.usuario.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.usuario }}
+                            {% if form.usuario.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.usuario.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.password_plain.id_for_label }}" class="form-label">
+                                {{ form.password_plain.label }}
+                            </label>
+                            {{ form.password_plain }}
+                            {% if form.password_plain.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password_plain.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.password_plain.help_text %}
+                                <small class="form-text text-muted">{{ form.password_plain.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.sede.id_for_label }}" class="form-label">
+                                {{ form.sede.label }}
+                            </label>
+                            {{ form.sede }}
+                            {% if form.sede.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.sede.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.area.id_for_label }}" class="form-label">
+                                {{ form.area.label }}
+                            </label>
+                            {{ form.area }}
+                            {% if form.area.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.area.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.ubicacion_fisica.id_for_label }}" class="form-label">
+                                {{ form.ubicacion_fisica.label }}
+                            </label>
+                            {{ form.ubicacion_fisica }}
+                            {% if form.ubicacion_fisica.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.ubicacion_fisica.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.modelo.id_for_label }}" class="form-label">
+                                {{ form.modelo.label }}
+                            </label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.modelo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.serie.id_for_label }}" class="form-label">
+                                {{ form.serie.label }}
+                            </label>
+                            {{ form.serie }}
+                            {% if form.serie.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.serie.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.version_routeros.id_for_label }}" class="form-label">
+                                {{ form.version_routeros.label }}
+                            </label>
+                            {{ form.version_routeros }}
+                            {% if form.version_routeros.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.version_routeros.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                {{ form.observaciones.label }}
+                            </label>
+                            {{ form.observaciones }}
+                            {% if form.observaciones.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.observaciones.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'inventario:lista_conexiones_winbox' %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Actualizar Conexión
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-info-circle me-2"></i>Información de la Conexión
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Creada:</strong> {{ conexion.fecha_creacion|date:"d/m/Y H:i" }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Última actualización:</strong> {{ conexion.fecha_actualizacion|date:"d/m/Y H:i" }}
+                    </li>
+                    {% if conexion.ultima_conexion %}
+                    <li class="mb-2">
+                        <strong>Última conexión:</strong> {{ conexion.ultima_conexion|date:"d/m/Y H:i" }}
+                    </li>
+                    {% endif %}
+                    {% if conexion.ultimo_usuario_conectado %}
+                    <li class="mb-2">
+                        <strong>Último usuario:</strong> {{ conexion.ultimo_usuario_conectado.get_full_name }}
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

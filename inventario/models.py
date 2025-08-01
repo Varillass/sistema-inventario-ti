@@ -508,3 +508,198 @@ class Cuenta(models.Model):
             return 'proximo_vencimiento'
         else:
             return 'vigente'
+
+
+class PlanificacionSemanal(models.Model):
+    """Modelo para planificación semanal de tareas"""
+    PRIORIDADES = (
+        ('alta', 'Alta'),
+        ('media', 'Media'),
+        ('baja', 'Baja'),
+    )
+    
+    ESTADOS = (
+        ('pendiente', 'Pendiente'),
+        ('en_proceso', 'En Proceso'),
+        ('completada', 'Completada'),
+        ('cancelada', 'Cancelada'),
+    )
+    
+    DIAS_SEMANA = (
+        ('lunes', 'Lunes'),
+        ('martes', 'Martes'),
+        ('miercoles', 'Miércoles'),
+        ('jueves', 'Jueves'),
+        ('viernes', 'Viernes'),
+        ('sabado', 'Sábado'),
+        ('domingo', 'Domingo'),
+    )
+    
+    titulo = models.CharField(max_length=200, help_text="Título de la tarea")
+    descripcion = models.TextField(help_text="Descripción detallada de la tarea")
+    dia_semana = models.CharField(max_length=20, choices=DIAS_SEMANA, help_text="Día de la semana")
+    hora_inicio = models.TimeField(help_text="Hora de inicio")
+    hora_fin = models.TimeField(blank=True, null=True, help_text="Hora de finalización")
+    prioridad = models.CharField(max_length=10, choices=PRIORIDADES, default='media')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
+    
+    # Asignación
+    personal_asignado = models.ForeignKey(Personal, on_delete=models.SET_NULL, blank=True, null=True, related_name='tareas_asignadas', help_text="Personal asignado a esta tarea")
+    sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='tareas', blank=True, null=True)
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name='tareas', blank=True, null=True)
+    
+    # Fechas
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_completada = models.DateTimeField(blank=True, null=True)
+    
+    # Campos adicionales
+    observaciones = models.TextField(blank=True, null=True)
+    activo = models.BooleanField(default=True)
+    
+    class Meta:
+        verbose_name = 'Planificación Semanal'
+        verbose_name_plural = 'Planificaciones Semanales'
+        ordering = ['dia_semana', 'hora_inicio', 'prioridad']
+    
+    def __str__(self):
+        return f"{self.titulo} - {self.get_dia_semana_display()}"
+    
+    @property
+    def duracion(self):
+        """Calcula la duración de la tarea"""
+        if self.hora_fin and self.hora_inicio:
+            from datetime import datetime, timedelta
+            inicio = datetime.combine(datetime.today(), self.hora_inicio)
+            fin = datetime.combine(datetime.today(), self.hora_fin)
+            if fin < inicio:
+                fin += timedelta(days=1)
+            duracion = fin - inicio
+            return duracion
+        return None
+    
+    @property
+    def duracion_horas(self):
+        """Retorna la duración en horas"""
+        if self.duracion:
+            return round(self.duracion.total_seconds() / 3600, 1)
+        return None
+
+
+class ConexionWinbox(models.Model):
+    """Modelo para gestionar conexiones Winbox a MikroTik"""
+    TIPOS_EQUIPO = (
+        ('router', 'Router'),
+        ('switch', 'Switch'),
+        ('access_point', 'Access Point'),
+        ('firewall', 'Firewall'),
+        ('otro', 'Otro'),
+    )
+    
+    ESTADOS_CONEXION = (
+        ('activa', 'Activa'),
+        ('inactiva', 'Inactiva'),
+        ('mantenimiento', 'En Mantenimiento'),
+        ('error', 'Error de Conexión'),
+    )
+    
+    nombre = models.CharField(max_length=200, help_text="Nombre descriptivo de la conexión")
+    tipo_equipo = models.CharField(max_length=20, choices=TIPOS_EQUIPO, default='router', verbose_name='Tipo de Equipo')
+    ip_address = models.GenericIPAddressField(help_text="Dirección IP del equipo")
+    puerto = models.IntegerField(default=8291, help_text="Puerto Winbox (por defecto 8291)")
+    
+    # Credenciales (encriptadas)
+    usuario = models.CharField(max_length=100, help_text="Usuario de acceso")
+    password = models.TextField(blank=True, null=True, help_text="Contraseña encriptada")
+    
+    # Ubicación
+    sede = models.ForeignKey(Sede, on_delete=models.CASCADE, related_name='conexiones_winbox', blank=True, null=True)
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name='conexiones_winbox', blank=True, null=True)
+    ubicacion_fisica = models.CharField(max_length=200, blank=True, null=True, help_text="Ubicación física del equipo")
+    
+    # Información del equipo
+    modelo = models.CharField(max_length=100, blank=True, null=True)
+    serie = models.CharField(max_length=100, blank=True, null=True)
+    version_routeros = models.CharField(max_length=50, blank=True, null=True, help_text="Versión de RouterOS")
+    
+    # Estado y configuración
+    estado = models.CharField(max_length=20, choices=ESTADOS_CONEXION, default='activa')
+    ultima_conexion = models.DateTimeField(blank=True, null=True)
+    ultimo_usuario_conectado = models.ForeignKey(Usuario, on_delete=models.SET_NULL, blank=True, null=True, related_name='conexiones_realizadas')
+    
+    # Campos de control
+    activo = models.BooleanField(default=True)
+    observaciones = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Conexión Winbox'
+        verbose_name_plural = 'Conexiones Winbox'
+        ordering = ['sede', 'area', 'nombre']
+        unique_together = ['ip_address', 'puerto']
+    
+    def __str__(self):
+        return f"{self.nombre} ({self.ip_address}:{self.puerto})"
+    
+    def _get_encryption_key(self):
+        """Obtiene la clave de encriptación desde settings o genera una nueva"""
+        if hasattr(settings, 'WINBOX_ENCRYPTION_KEY'):
+            return settings.WINBOX_ENCRYPTION_KEY
+        else:
+            # Usar la misma clave que las licencias si no existe una específica
+            if hasattr(settings, 'LICENSE_ENCRYPTION_KEY'):
+                return settings.LICENSE_ENCRYPTION_KEY
+            else:
+                # Generar una clave si no existe en settings
+                key = Fernet.generate_key()
+                return key
+    
+    def encrypt_password(self, password):
+        """Encripta la contraseña"""
+        if not password:
+            return None
+        
+        try:
+            fernet = Fernet(self._get_encryption_key())
+            encrypted_data = fernet.encrypt(password.encode())
+            return base64.b64encode(encrypted_data).decode()
+        except Exception as e:
+            return None
+    
+    def decrypt_password(self):
+        """Desencripta la contraseña"""
+        if not self.password:
+            return None
+        
+        try:
+            fernet = Fernet(self._get_encryption_key())
+            encrypted_data = base64.b64decode(self.password.encode())
+            decrypted_data = fernet.decrypt(encrypted_data)
+            return decrypted_data.decode()
+        except Exception as e:
+            return None
+    
+    def set_password(self, password):
+        """Establece la contraseña encriptada"""
+        self.password = self.encrypt_password(password)
+    
+    def get_password(self):
+        """Obtiene la contraseña desencriptada"""
+        return self.decrypt_password()
+    
+    @property
+    def url_conexion(self):
+        """Genera la URL de conexión Winbox"""
+        return f"winbox://{self.ip_address}:{self.puerto}"
+    
+    @property
+    def estado_color(self):
+        """Retorna el color CSS según el estado"""
+        colores = {
+            'activa': 'success',
+            'inactiva': 'secondary',
+            'mantenimiento': 'warning',
+            'error': 'danger',
+        }
+        return colores.get(self.estado, 'secondary')

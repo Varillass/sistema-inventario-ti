@@ -89,4 +89,19 @@ urlpatterns = [
     path('cuentas/<int:cuenta_id>/editar/', views.editar_cuenta, name='editar_cuenta'),
     path('cuentas/<int:cuenta_id>/eliminar/', views.eliminar_cuenta, name='eliminar_cuenta'),
     path('gestion-cuentas/', views.gestion_cuentas, name='gestion_cuentas'),
+
+    # URLs para Planificación Semanal
+    path('planificacion-semanal/', views.lista_planificacion_semanal, name='lista_planificacion_semanal'),
+    path('planificacion-semanal/crear/', views.crear_planificacion_semanal, name='crear_planificacion_semanal'),
+    path('planificacion-semanal/<int:tarea_id>/editar/', views.editar_planificacion_semanal, name='editar_planificacion_semanal'),
+    path('planificacion-semanal/<int:tarea_id>/eliminar/', views.eliminar_planificacion_semanal, name='eliminar_planificacion_semanal'),
+    path('planificacion-semanal/<int:tarea_id>/cambiar-estado/', views.cambiar_estado_tarea, name='cambiar_estado_tarea'),
+    
+    # URLs para Conexiones Winbox
+    path('conexiones-winbox/', views.lista_conexiones_winbox, name='lista_conexiones_winbox'),
+    path('conexiones-winbox/crear/', views.crear_conexion_winbox, name='crear_conexion_winbox'),
+    path('conexiones-winbox/<int:conexion_id>/editar/', views.editar_conexion_winbox, name='editar_conexion_winbox'),
+    path('conexiones-winbox/<int:conexion_id>/eliminar/', views.eliminar_conexion_winbox, name='eliminar_conexion_winbox'),
+    path('conexiones-winbox/<int:conexion_id>/conectar/', views.conectar_winbox, name='conectar_winbox'),
+    path('api/conexiones-winbox/<int:conexion_id>/password/', views.api_get_winbox_password, name='api_get_winbox_password'),
 ] 

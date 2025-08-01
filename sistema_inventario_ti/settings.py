@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e-m^apc7nf16p)*w%bk-52*ykk1l4f(tc++4)c)(e2f-z6t_y@'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-e-m^apc7nf16p)*w%bk-52*ykk1l4f(tc++4)c)(e2f-z6t_y@')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver']
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver', '.onrender.com', '.render.com']
 
 # Application definition
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir archivos estáticos en Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,20 +75,31 @@ WSGI_APPLICATION = 'sistema_inventario_ti.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'inventario_ti',
-        'USER': 'root',
-        'PASSWORD': 'Gr33n2025#New',
-        'HOST': '192.10.10.250',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
+# Configuración de base de datos para desarrollo y producción
+if DEBUG:
+    # Configuración para desarrollo local
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'inventario_ti',
+            'USER': 'afrodita',
+            'PASSWORD': 'Zxasqw12@@@',
+            'HOST': '181.224.226.142',
+            'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            },
+        }
     }
-}
-
+else:
+    # Configuración para producción (Render)
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 
 # Custom User Model
 AUTH_USER_MODEL = 'inventario.Usuario'
@@ -132,6 +144,10 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Configuración de WhiteNoise para servir archivos estáticos en producción
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -154,7 +170,23 @@ LOGOUT_REDIRECT_URL = '/login/'
 # ============================================================================
 
 # Clave de encriptación para licencias (generada con Fernet.generate_key())
-LICENSE_ENCRYPTION_KEY = b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
+LICENSE_ENCRYPTION_KEY = os.environ.get('LICENSE_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=')
 
 # Clave de encriptación para cuentas (puede ser la misma o diferente)
-ACCOUNT_ENCRYPTION_KEY = b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY='
+ACCOUNT_ENCRYPTION_KEY = os.environ.get('ACCOUNT_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=')
+
+# Clave de encriptación para conexiones Winbox (puede ser la misma o diferente)
+WINBOX_ENCRYPTION_KEY = os.environ.get('WINBOX_ENCRYPTION_KEY', b'2vDGw7FRIz6ENdyS0cdydLEyo3NqOCJ2816NeClTcgY=')
+
+# Configuraciones de seguridad para producción
+if not DEBUG:
+    # Configuraciones de seguridad para producción
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

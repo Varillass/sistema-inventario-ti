@@ -292,6 +292,20 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {% if 'conexiones_winbox' in request.resolver_match.url_name %}active{% endif %}"
+                               href="{% url 'inventario:lista_conexiones_winbox' %}">
+                                <i class="fas fa-network-wired me-2"></i>
+                                Conexiones Winbox
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'planificacion_semanal' in request.resolver_match.url_name %}active{% endif %}"
+                               href="{% url 'inventario:lista_planificacion_semanal' %}">
+                                <i class="fas fa-calendar-week me-2"></i>
+                                Planificación Semanal
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {% if request.resolver_match.url_name == 'configuracion_sistema' %}active{% endif %}" 
                                href="{% url 'inventario:configuracion_sistema' %}">
                                 <i class="fas fa-cogs me-2"></i>
