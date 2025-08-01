@@ -284,6 +284,16 @@ class CuentaForm(forms.ModelForm):
                 self.fields['area'].queryset = Area.objects.none()
         else:
             self.fields['area'].queryset = Area.objects.none()
+        
+        # Si es una edición (instance existe), inicializar password_plana con la contraseña actual
+        if 'instance' in kwargs and kwargs['instance']:
+            instance = kwargs['instance']
+            if instance.password:
+                # Obtener la contraseña desencriptada
+                password_desencriptada = instance.get_password()
+                if password_desencriptada:
+                    # Establecer el valor inicial del campo password_plana
+                    self.fields['password_plana'].initial = password_desencriptada
     
     def save(self, commit=True):
         cuenta = super().save(commit=False)

@@ -80,6 +80,7 @@ urlpatterns = [
     path('api/areas-por-sede/', views.api_areas_por_sede, name='api_areas_por_sede'),
     path('api/personal-por-area/', views.api_personal_por_area, name='api_personal_por_area'),
     path('api/licencias/<int:licencia_id>/clave/', views.api_get_license_key, name='api_get_license_key'),
+    path('api/cuentas/<int:cuenta_id>/password/', views.api_get_account_password, name='api_get_account_password'),
     
     # URLs para gestión de cuentas
     path('cuentas/', views.lista_cuentas, name='lista_cuentas'),

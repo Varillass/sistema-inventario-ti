@@ -306,19 +306,40 @@ $(document).ready(function() {
         var toggleIcon = $('#toggle-icon');
         
         if (passwordField.attr('type') === 'password') {
-            passwordField.attr('type', 'text');
-            toggleIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+            // Obtener la contraseña real desde el servidor
+            fetch('{% url "inventario:api_get_account_password" cuenta.id %}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        passwordField.attr('type', 'text');
+                        passwordField.val(data.password);
+                        toggleIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+                    } else {
+                        alert('Error al obtener la contraseña: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al obtener la contraseña');
+                });
         } else {
             passwordField.attr('type', 'password');
+            passwordField.val('••••••••');
             toggleIcon.removeClass('fa-eye-slash').addClass('fa-eye');
         }
     });
     
     // Copy password to clipboard
     $('#copy-password').click(function() {
-        // Aquí podrías implementar la funcionalidad para copiar la contraseña
-        // Por seguridad, no se muestra la contraseña real en el frontend
-        alert('Por seguridad, la contraseña no se puede copiar desde la interfaz. Contacta al administrador.');
+        var passwordField = $('#password-field');
+        if (passwordField.attr('type') === 'text' && passwordField.val() !== '••••••••') {
+            // Copiar la contraseña visible al portapapeles
+            passwordField.select();
+            document.execCommand('copy');
+            alert('Contraseña copiada al portapapeles');
+        } else {
+            alert('Primero debe mostrar la contraseña haciendo clic en el ojo');
+        }
     });
 });
 </script>

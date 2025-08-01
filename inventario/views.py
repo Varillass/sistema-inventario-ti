@@ -2412,3 +2412,29 @@ def api_get_license_key(request, licencia_id):
         })
 
 
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+@csrf_exempt
+def api_get_account_password(request, cuenta_id):
+    """API para obtener la contraseña de cuenta desencriptada"""
+    try:
+        cuenta = get_object_or_404(Cuenta, id=cuenta_id)
+        password = cuenta.get_password()
+        
+        if password:
+            return JsonResponse({
+                'success': True,
+                'password': password
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'No se pudo desencriptar la contraseña'
+            })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+

@@ -441,11 +441,11 @@ class Cuenta(models.Model):
     def _get_encryption_key(self):
         """Obtiene la clave de encriptación desde settings o genera una nueva"""
         if hasattr(settings, 'ACCOUNT_ENCRYPTION_KEY'):
-            return settings.ACCOUNT_ENCRYPTION_KEY.encode()
+            return settings.ACCOUNT_ENCRYPTION_KEY
         else:
             # Usar la misma clave que las licencias si no existe una específica
             if hasattr(settings, 'LICENSE_ENCRYPTION_KEY'):
-                return settings.LICENSE_ENCRYPTION_KEY.encode()
+                return settings.LICENSE_ENCRYPTION_KEY
             else:
                 # Generar una clave si no existe en settings
                 key = Fernet.generate_key()
